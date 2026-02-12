@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Atlas Project — Geometry of Meaning</title>
+  <meta name="description" content="Atlas Project proposal: Atlas v1 (Tag Field), Atlas Sphere v2 (bounded world), Atlas Dimensions v3 (multi-tag intersections + depth navigation), AtlasWorld + Atlas Genesis (world-building from slices), and the D10 Book-Dice pipeline for training meaning-aware visual formation models." />
+
+  <style>
+    :root{
+      --bg0:#060812;
+      --bg1:#0b1022;
+      --panel:rgba(255,255,255,.06);
+      --panel2:rgba(255,255,255,.035);
+      --border:rgba(255,255,255,.11);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.70);
+      --muted2:rgba(255,255,255,.54);
+
+      --cyan:#4fd1ff;
+      --violet:#a78bfa;
+      --mint:#34d399;
+      --amber:#fbbf24;
+      --rose:#fb7185;
+
+      /* Calling Color for the heading term */
+      --gom:#ff3df2;
+      --gom2:#79c0ff;
+
+      --shadow: 0 18px 60px rgba(0,0,0,.56);
+      --radius: 18px;
+      --radius2: 26px;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 12% 0%, rgba(167,139,250,.18), transparent 60%),
+        radial-gradient(1100px 900px at 88% 12%, rgba(79,209,255,.14), transparent 60%),
+        radial-gradient(900px 700px at 50% 110%, rgba(52,211,153,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      letter-spacing:.1px;
+      line-height:1.45;
+    }
+
+    a{color:var(--cyan); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:1200px; margin:0 auto; padding:26px 18px 88px}
+
+    /* Sticky top nav */
+    .top{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:14px; padding:10px 6px 18px;
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(6,8,18,.76), rgba(6,8,18,.28));
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .brand{display:flex; align-items:center; gap:10px; font-weight:950; letter-spacing:.2px}
+    .spark{
+      width:14px; height:14px; border-radius:999px;
+      background: conic-gradient(from 0deg, var(--cyan), var(--violet), var(--mint), var(--cyan));
+      box-shadow: 0 0 0 5px rgba(79,209,255,.10);
+    }
+    .nav{display:flex; gap:12px; flex-wrap:wrap}
+    .nav a{
+      color:var(--muted);
+      font-weight:750;
+      font-size:13px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid transparent;
+    }
+    .nav a:hover{
+      color:var(--text);
+      border-color: rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      text-decoration:none;
+    }
+
+    /* Cards / layout */
+    .card{
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border:1px solid var(--border);
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+    }
+    .pad{padding:18px}
+    .pad-xl{padding:26px 22px}
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:14px;
+      margin-top:18px;
+    }
+    .span12{grid-column: span 12}
+    .span8{grid-column: span 8}
+    .span7{grid-column: span 7}
+    .span6{grid-column: span 6}
+    .span5{grid-column: span 5}
+    .span4{grid-column: span 4}
+    @media (max-width: 980px){
+      .span8,.span7,.span6,.span5,.span4{grid-column: span 12}
+    }
+
+    /* Hero */
+    .hero{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:16px;
+      align-items:stretch;
+      margin-top:8px;
+    }
+    @media (max-width: 980px){ .hero{grid-template-columns:1fr} }
+
+    .kicker{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:7px 12px; border-radius:999px;
+      background: rgba(79,209,255,.10);
+      border:1px solid rgba(79,209,255,.22);
+      color: var(--muted);
+      font-size:13px;
+      font-weight:750;
+      width:max-content;
+    }
+    .kdot{
+      width:8px; height:8px; border-radius:999px;
+      background: var(--cyan);
+      box-shadow: 0 0 18px rgba(79,209,255,.65);
+    }
+
+    h1{
+      margin:14px 0 10px;
+      font-size:44px;
+      line-height:1.03;
+      letter-spacing:-.85px;
+    }
+    @media (max-width: 520px){ h1{font-size:34px} }
+
+    h2{
+      margin:0 0 8px;
+      font-size:24px;
+      letter-spacing:-.25px;
+    }
+    h3{
+      margin:0 0 6px;
+      font-size:16px;
+      letter-spacing:-.15px;
+    }
+
+    .lead{
+      color:var(--muted);
+      font-size:16px;
+      max-width: 80ch;
+      margin: 0;
+    }
+    .subhead{
+      font-family: var(--mono);
+      font-size:12px;
+      color: rgba(255,255,255,.58);
+      letter-spacing:.6px;
+      text-transform:uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* Terms / chips */
+    .term{
+      font-weight:900;
+      letter-spacing:.1px;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      display:inline-block;
+      margin: 2px 4px 2px 0;
+      white-space:nowrap;
+    }
+    .t-cyan{ color: rgba(79,209,255,.95); border-color: rgba(79,209,255,.25); background: rgba(79,209,255,.08); }
+    .t-violet{ color: rgba(167,139,250,.96); border-color: rgba(167,139,250,.25); background: rgba(167,139,250,.08); }
+    .t-mint{ color: rgba(52,211,153,.96); border-color: rgba(52,211,153,.25); background: rgba(52,211,153,.08); }
+    .t-amber{ color: rgba(251,191,36,.95); border-color: rgba(251,191,36,.25); background: rgba(251,191,36,.08); }
+    .t-rose{ color: rgba(251,113,133,.95); border-color: rgba(251,113,133,.25); background: rgba(251,113,133,.08); }
+
+    .t-gom{
+      color: rgba(255,61,242,.96);
+      border-color: rgba(255,61,242,.30);
+      background: rgba(255,61,242,.10);
+      box-shadow: 0 0 0 6px rgba(255,61,242,.06);
+    }
+
+    /* Calling block */
+    .call{
+      margin-top:14px;
+      padding:14px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.14);
+      background:
+        radial-gradient(900px 240px at 20% 10%, rgba(255,61,242,.16), transparent 55%),
+        radial-gradient(900px 240px at 90% 20%, rgba(121,192,255,.12), transparent 60%),
+        rgba(0,0,0,.20);
+      position:relative;
+      overflow:hidden;
+    }
+    .call:before{
+      content:"";
+      position:absolute; inset:-60px -60px auto auto;
+      width:240px; height:240px;
+      background: radial-gradient(circle at 35% 35%, rgba(255,61,242,.22), transparent 60%);
+      transform: rotate(18deg);
+    }
+    .call-title{
+      margin:0 0 6px;
+      font-size:20px;
+      font-weight:1000;
+      letter-spacing:-.35px;
+      color: transparent;
+      background-image: linear-gradient(90deg, var(--gom), var(--gom2));
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+    .call p{margin:0; color: rgba(255,255,255,.80); font-size:13.5px}
+
+    /* Buttons */
+    .cta-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      padding:10px 14px; border-radius: 14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      font-weight:900;
+      font-size:13px;
+      letter-spacing:.2px;
+    }
+    .btn.primary{
+      border-color: rgba(79,209,255,.42);
+      background: rgba(79,209,255,.12);
+      box-shadow: 0 0 0 7px rgba(79,209,255,.07);
+    }
+    .btn:hover{filter:brightness(1.08); text-decoration:none}
+
+    /* Tiles / lists */
+    .tiles{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:12px;
+      margin-top:14px;
+    }
+    @media (max-width: 980px){ .tiles{grid-template-columns: repeat(2, minmax(0,1fr));} }
+    @media (max-width: 560px){ .tiles{grid-template-columns: 1fr;} }
+
+    .tile{
+      padding:14px;
+      border-radius: var(--radius);
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.20);
+      position:relative;
+      overflow:hidden;
+    }
+    .tile:before{
+      content:"";
+      position:absolute; inset:-40px -40px auto auto;
+      width:170px; height:170px;
+      background: radial-gradient(circle at 30% 30%, rgba(79,209,255,.16), transparent 60%);
+      transform: rotate(18deg);
+    }
+    .tile p{margin:0; color:var(--muted); font-size:13px}
+
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:12px; font-weight:1000;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.78);
+      margin-bottom:10px;
+      width:max-content;
+    }
+    .b1{border-color: rgba(79,209,255,.25); background: rgba(79,209,255,.07)}
+    .b2{border-color: rgba(167,139,250,.25); background: rgba(167,139,250,.07)}
+    .b3{border-color: rgba(52,211,153,.25); background: rgba(52,211,153,.07)}
+    .b4{border-color: rgba(251,191,36,.25); background: rgba(251,191,36,.07)}
+    .b5{border-color: rgba(251,113,133,.25); background: rgba(251,113,133,.07)}
+    .b6{border-color: rgba(255,61,242,.25); background: rgba(255,61,242,.07)}
+
+    /* Mini stack */
+    .stack{display:grid; gap:12px}
+    .mini{
+      padding:14px;
+      border-radius: var(--radius);
+      background: rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .mini h4{
+      margin:0 0 6px;
+      font-size:13px;
+      color:var(--muted);
+      font-weight:1000;
+      letter-spacing:.35px;
+      text-transform:uppercase;
+    }
+    .mini p{margin:0; color:var(--muted2); font-size:13px}
+
+    /* Diagram block */
+    .diagram{
+      font-family: var(--mono);
+      font-size:12px;
+      line-height:1.55;
+      color: rgba(255,255,255,.82);
+      background: rgba(0,0,0,.34);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: var(--radius);
+      padding:12px;
+      overflow:auto;
+    }
+    .diagram .c{color: rgba(79,209,255,.95)}
+    .diagram .v{color: rgba(167,139,250,.95)}
+    .diagram .m{color: rgba(52,211,153,.95)}
+    .diagram .a{color: rgba(251,191,36,.95)}
+    .diagram .r{color: rgba(251,113,133,.95)}
+    .diagram .g{color: rgba(255,61,242,.95)}
+
+    /* Section spacing */
+    section{margin-top:22px}
+
+    /* Footer */
+    footer{
+      margin-top:30px;
+      color: rgba(255,255,255,.52);
+      font-size:12px;
+      border-top:1px solid rgba(255,255,255,.10);
+      padding-top:14px;
+    }
+
+    /* Small helpers */
+    .hr{height:1px; background: rgba(255,255,255,.10); margin:14px 0}
+    ul.clean{margin:10px 0 0; padding-left:18px; color: var(--muted)}
+    ul.clean li{margin:6px 0; font-size:13px}
+    .mono{font-family: var(--mono)}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <span class="spark" aria-hidden="true"></span>
+        <span>Atlas Project</span>
+      </div>
+      <div class="nav">
+        <a href="#executive">Executive</a>
+        <a href="#gom">Geometry of Meaning</a>
+        <a href="#versions">Atlas v1–v3</a>
+        <a href="#sphere">Atlas Sphere</a>
+        <a href="#d10">D10 Book-Dice</a>
+        <a href="#genesis">Atlas Genesis</a>
+        <a href="#vr">VR Slices</a>
+        <a href="#ethics">Trust</a>
+      </div>
+    </div>
+
+    <!-- HERO -->
+    <div class="hero" id="executive">
+      <div class="card pad-xl">
+        <div class="kicker"><span class="kdot"></span>Proposal: A Spatial Intelligence System for Visual Archives</div>
+
+        <h1>
+          Atlas is a <span class="term t-gom">Geometry of Meaning</span>
+          that turns images into places, intersections, and worlds.
+        </h1>
+
+        <p class="lead">
+          Traditional organization is linear: folders, filenames, search queries.
+          Atlas is relational and spatial: it lets meaning behave like physics.
+          Users place <span class="term t-cyan">Tags</span> and <span class="term t-rose">Anchor Images</span>,
+          tune <span class="term t-amber">Heat</span>, and watch a collection settle into
+          navigable <span class="term t-mint">Clusters</span> and ranked <span class="term t-mint">Columns</span>.
+        </p>
+
+        <div class="call" id="gom">
+          <div class="call-title">Geometry of Meaning</div>
+          <p>
+            The core idea: meaning is not a list. It is a shape.
+            Atlas gives meaning a coordinate system, a gravitational logic, and visible formations.
+            This single lens unifies the entire roadmap: Tag Fields, Spheres, Dimensions, D10 story dice,
+            and ultimately world traversal.
+          </p>
+        </div>
+
+        <div class="cta-row">
+          <a class="btn primary" href="#versions">Read Atlas v1–v3</a>
+          <a class="btn" href="#d10">See the D10 pipeline</a>
+          <a class="btn" href="#vr">Jump to VR slices</a>
+        </div>
+
+        <div style="margin-top:14px; color:var(--muted2); font-size:13px;">
+          Foundational primitives:
+          <span class="term t-violet">Spatial Tag Field</span>
+          <span class="term t-amber">Heat</span>
+          <span class="term t-rose">Anchor Images</span>
+          <span class="term t-mint">Columns & Clusters</span>
+          <span class="term t-cyan">Explainable Coordinates</span>
+        </div>
+      </div>
+
+      <div class="card pad">
+        <div class="stack">
+          <div class="mini">
+            <h4>What users get</h4>
+            <p>
+              A living map of their archive: discover relationships, find aesthetics, and return to regions
+              without remembering filenames.
+            </p>
+          </div>
+          <div class="mini">
+            <h4>What creators get</h4>
+            <p>
+              A searchless creative engine: pick a seed image, dial meaning, and explore gradients of variation.
+            </p>
+          </div>
+          <div class="mini">
+            <h4>What investors get</h4>
+            <p>
+              A platform narrative: “cartographers of meaning” plus scalable training loops that convert curation into models.
+            </p>
+          </div>
+          <div class="mini">
+            <h4>What the system is</h4>
+            <p>
+              A spatial UI + embedding engine + metadata store + optional generative layer for synthesis and world-building.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROBLEM -->
+    <section id="problem">
+      <div class="card pad">
+        <div class="subhead">The problem</div>
+        <h2>Why existing tools break for visual minds</h2>
+        <p class="lead">
+          Folders demand upfront categorization. Search demands you remember words.
+          Galleries show items, but hide relationships.
+          Tags exist, but remain static labels instead of forces that reshape discovery.
+        </p>
+
+        <div class="tiles">
+          <div class="tile">
+            <div class="badge b1">Rigid</div>
+            <h3>Folders are pre-commitment</h3>
+            <p>You must decide what something “is” before you’ve explored what it relates to.</p>
+          </div>
+          <div class="tile">
+            <div class="badge b2">Memory-dependent</div>
+            <h3>Search assumes recall</h3>
+            <p>If you forget the name, you lose the thing. Atlas assumes recognition instead.</p>
+          </div>
+          <div class="tile">
+            <div class="badge b3">No gradients</div>
+            <h3>Relationships are hidden</h3>
+            <p>Most systems cannot show “closest to this vibe, then slightly further, then strange cousins.”</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- THE SOLUTION -->
+    <section id="solution">
+      <div class="grid">
+        <div class="card pad span7">
+          <div class="subhead">The solution</div>
+          <h2>Atlas replaces lists with formations</h2>
+          <p class="lead">
+            Atlas converts images into embeddings, then makes exploration spatial.
+            Users don’t ask “where is that file?”
+            They ask “what’s closest to this meaning?”
+          </p>
+
+          <div class="hr"></div>
+
+          <div class="diagram" aria-label="Atlas core loop diagram">
+            <span class="c">1) Ingest</span>: images → embeddings + metadata
+            <br/>
+            <span class="v">2) Place</span>: tags + anchors → coordinates/forces
+            <br/>
+            <span class="a">3) Weight</span>: heat (default neutral equilibrium)
+            <br/>
+            <span class="m">4) Form</span>: columns, clusters, crossroads
+            <br/>
+            <span class="c">5) Browse</span>: global view + local neighborhood + depth dials
+            <br/>
+            <span class="g">6) Learn</span>: user curation/annotations improve models
+          </div>
+
+          <ul class="clean">
+            <li><b>Default heat</b> shows the most faithful map of what the archive naturally contains.</li>
+            <li><b>Increasing heat</b> intentionally biases mass toward a chosen meaning and away from others.</li>
+            <li><b>Tag placement</b> controls which intersections become sharp (close) vs broad (far).</li>
+            <li><b>Anchors</b> add aesthetic gravity: “like this image, but in the direction of these tags.”</li>
+          </ul>
+        </div>
+
+        <div class="card pad span5">
+          <div class="subhead">Explainability</div>
+          <h2>Every result is readable</h2>
+          <p class="lead">
+            Atlas isn’t a black box. Every image and formation carries a compact explanation bundle so users can learn the map.
+          </p>
+
+          <div style="margin-top:12px; color:var(--muted); font-size:13px;">
+            Each image stores:
+            <div style="margin-top:10px">
+              <span class="term t-cyan">Field Coordinate</span>
+              <span class="term t-violet">Column Coordinate</span>
+              <span class="term t-amber">Heat Context</span>
+              <span class="term t-mint">Tag Relations</span>
+              <span class="term t-rose">Anchor Relations</span>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <p class="lead">
+            Each column stores a <span class="term t-violet">Column Signature</span>:
+            a fingerprint of tag positions, tag heats, active anchors, and the column’s identity.
+            This enables side-by-side comparison and “return to this exact formation” navigation.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- VERSIONS -->
+    <section id="versions">
+      <div class="card pad">
+        <div class="subhead">Atlas versions</div>
+        <h2>v1, v2, v3 are stepping stones, not rebrands</h2>
+        <p class="lead">
+          Each version keeps the same essence (meaning as geometry) but expands how intersections form and how humans navigate them.
+        </p>
+
+        <div class="tiles">
+          <div class="tile">
+            <div class="badge b1">Atlas v1.0</div>
+            <h3>Spatial Tag Field → Columns</h3>
+            <p>
+              A flat <span class="term t-violet">XY Tag Field</span> where tags are placed like stars.
+              Under intersections, ranked <span class="term t-mint">columns</span> form.
+              Best matches at the top, variation down the column.
+            </p>
+            <ul class="clean">
+              <li>Drag tags closer for tighter intersections, further for broader blends</li>
+              <li>Heat adjusts how strongly a tag pulls images into its basin</li>
+              <li>Anchor images optionally bias the field</li>
+            </ul>
+          </div>
+
+          <div class="tile" id="sphere">
+            <div class="badge b2">Atlas Sphere v2.0</div>
+            <h3>Bounded world → Interior placement</h3>
+            <p>
+              The archive becomes a finite world. Tags and anchors sit on the surface.
+              Every image is placed inside the sphere where it best approximates surface forces.
+            </p>
+            <ul class="clean">
+              <li>Prevents infinite sprawl: clusters become revisitable regions</li>
+              <li>Click a point to open a local neighborhood gallery around it</li>
+              <li>Bookmark and annotate regions: you become a <b>Cartographer of Meaning</b></li>
+            </ul>
+          </div>
+
+          <div class="tile">
+            <div class="badge b6">Atlas Dimensions v3.0</div>
+            <h3>Intersections become multi-dimensional formations</h3>
+            <p>
+              v3 adds a crucial leap: tags are not only forces, they are also placed in an XY micro-field that
+              determines how multi-column formations appear beneath and between them.
+            </p>
+            <ul class="clean">
+              <li>Single image + tag can form a branch (a directed column)</li>
+              <li>Two images can form a pairing branch: “best approximates both” ranked top→down</li>
+              <li>Multiple tags produce multi-column stalactite-like formations under tag intersections</li>
+              <li>Moving tags closer/further changes which intersections become “power nodes”</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="grid">
+          <div class="card pad span6" style="background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));">
+            <div class="subhead">Atlas v3 navigation</div>
+            <h2>Depth Carousel + Axis Views</h2>
+            <p class="lead">
+              v3 adds investor-friendly, human-friendly traversal:
+              you can view the “top layer” of strongest matches or descend into deeper variation.
+            </p>
+
+            <div class="tiles" style="margin-top:12px">
+              <div class="tile">
+                <div class="badge b3">Z-dimension overview</div>
+                <h3>Layer-by-layer descent</h3>
+                <p>Move a large dial to descend the whole scene: top matches → deeper variation.</p>
+              </div>
+              <div class="tile">
+                <div class="badge b1">Column carousel</div>
+                <h3>Image-by-image drill</h3>
+                <p>Click a column and scroll down via a small dial or numeric jump.</p>
+              </div>
+              <div class="tile">
+                <div class="badge b2">Side profiles</div>
+                <h3>X/Y “profile” views</h3>
+                <p>Inspect formations from the side to compare adjacent columns and transitions.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card pad span6">
+            <div class="subhead">Atlas v3 explainability</div>
+            <h2>Every image carries a meaning-coordinate bundle</h2>
+            <p class="lead">
+              Each image is not just “in a cluster.” It has a coordinate in the tag field space,
+              a unique complex marker, and a descriptor of how it relates to all tags, not only the nearest ones.
+            </p>
+
+            <div class="diagram" aria-label="Meaning coordinate bundle">
+              Image Record:
+              <br/>- <span class="c">Precise coordinate</span> in Tag Field space
+              <br/>- <span class="v">Unique complex marker</span> (compact identity)
+              <br/>- <span class="m">Relational descriptor</span>: strength vs each active tag
+              <br/>- <span class="a">Heat context</span>: which tags were hot, which were neutral
+              <br/>- <span class="r">Anchor context</span>: which images influenced placement
+              <br/>- <span class="v">Column signature</span>: fingerprint of the formation parameters
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HEAT TECH EXPLAINED -->
+    <section id="heat">
+      <div class="card pad">
+        <div class="subhead">Heat, clarified</div>
+        <h2>What “heat pulls mass” means in plain terms</h2>
+        <p class="lead">
+          With equal heat, Atlas tries to place images where they “most truthfully” belong relative to the tag geometry.
+          Increasing a tag’s heat increases its influence in the scoring function, so more images qualify as “best fits” for that tag.
+          This can pull images away from neighboring tags because the system is optimizing under weighted forces.
+        </p>
+
+        <div class="tiles">
+          <div class="tile">
+            <div class="badge b4">Default heat</div>
+            <h3>Neutral equilibrium</h3>
+            <p>
+              All tags contribute evenly. The map reflects the archive’s natural structure, not a user’s bias.
+            </p>
+          </div>
+          <div class="tile">
+            <div class="badge b4">Raising heat</div>
+            <h3>Intentional bias</h3>
+            <p>
+              A hot tag expands its basin. More images get pulled toward it, even borderline matches,
+              reshaping clusters and columns.
+            </p>
+          </div>
+          <div class="tile">
+            <div class="badge b4">Lowering heat</div>
+            <h3>Softened influence</h3>
+            <p>
+              A cooled tag becomes a gentle hint rather than a command. Intersections become broader and less exclusive.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ATLAS PLANES (PLAINS) -->
+    <section id="planes">
+      <div class="card pad">
+        <div class="subhead">Side vision</div>
+        <h2>Atlas Planes (pronounced “plains”)</h2>
+        <p class="lead">
+          A stylized traversal mode for orientation.
+          Images and tags become stars on a plane above, while clusters exist as depth beneath.
+          Users can travel the plane to understand where they are before descending into a cluster.
+          The plane’s aesthetic can be themed (desert, mall, cathedral, city grid) and is ideal for VR.
+        </p>
+
+        <div class="tiles">
+          <div class="tile">
+            <div class="badge b2">Orientation</div>
+            <h3>See the constellations</h3>
+            <p>Tags and anchor images act like navigation stars, helping users stay oriented across regions.</p>
+          </div>
+          <div class="tile">
+            <div class="badge b3">Descent</div>
+            <h3>Drop into clusters</h3>
+            <p>From the plane, pick a region and descend into its neighborhood or formation layers.</p>
+          </div>
+          <div class="tile">
+            <div class="badge b1">VR-ready</div>
+            <h3>A world you can walk</h3>
+            <p>Turn meaning into a landscape you physically traverse, a perfect investor demo for immersion.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- D10 BOOK-DICE -->
+    <section id="d10">
+      <div class="card pad">
+        <div class="subhead">Training pipeline</div>
+        <h2>D10 Book-Dice: turning books into spatial meaning engines</h2>
+        <p class="lead">
+          The D10 model converts long-form text into structured meaning columns.
+          Each page becomes a tile on a 10-sided die (or a set of dice), and each tile generates:
+          a page summary (relative to the whole work) plus a controlled set of tags.
+          Those tags become constraints that Atlas uses to rank and settle images into columns and slices.
+        </p>
+
+        <div class="diagram" aria-label="D10 Book-Dice pipeline">
+          <span class="g">Input</span>: Book (N pages)
+          <br/>
+          <span class="c">Step A</span>: Page → summary (page-in-context-of-whole)
+          <br/>
+          <span class="v">Step B</span>: Tags generated with anti-repeat constraints
+          <br/>
+          <span class="a">Step C</span>: Tags → column constraints → ranked image gradients
+          <br/>
+          <span class="m">Step D</span>: Human curation + model interpolation produce best columns
+          <br/>
+          <span class="g">Output</span>: 1M+ “correct” meaning dice used to train robust mapping from text→visual formations
+        </div>
+
+        <div class="grid">
+          <div class="card pad span6">
+            <div class="subhead">Tag novelty rules</div>
+            <h2>Novel, non-redundant, but still accurate</h2>
+            <p class="lead">
+              The goal is not random tags. The goal is coverage and distinctiveness.
+              A page should be described in a way that is correct, but not a clone of prior pages.
+            </p>
+            <ul class="clean">
+              <li><b>Tag 1 is always unique</b>: the best single encapsulation of that page’s uniqueness within the work.</li>
+              <li>Remaining tags prefer novelty; if reuse happens, order changes to reflect the page’s emphasis.</li>
+              <li>Constraint: avoid producing a tag block that is “half the same” across pages.</li>
+              <li>Operational target: ~40 tags/page (tunable by scale and cost).</li>
+            </ul>
+          </div>
+
+          <div class="card pad span6">
+            <div class="subhead">Human loop</div>
+            <h2>How we train meaning into visuals</h2>
+            <p class="lead">
+              Curators and artists generate two anchors per column:
+              the closest interpretation and the farthest interpretation.
+              Models generate intermediate images in a gradient.
+              Users then mix and arrange columns to select the best formation.
+              Those selections become training data.
+            </p>
+            <ul class="clean">
+              <li>Artist produces: <b>Top Anchor</b> (closest) + <b>Bottom Anchor</b> (farthest)</li>
+              <li>Model produces: 10–50 intermediates (a graded column)</li>
+              <li>Community selects and ranks the best column structure</li>
+              <li>Repeat at scale: target 1M+ columns to train robust text→visual mapping</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ATLASWORLD + GENESIS -->
+    <section id="genesis">
+      <div class="card pad">
+        <div class="subhead">AtlasWorld + Genesis</div>
+        <h2>From formations to worlds: Atlas Genesis</h2>
+        <p class="lead">
+          AtlasWorld places images on a sphere and lets meaning settle within the constraints of that world.
+          Atlas Genesis goes further: you can drop an image at a coordinate and the system transforms it toward what “belongs there,”
+          using the original as a seed and drawing style/structure from learned worlds.
+        </p>
+
+        <div class="tiles">
+          <div class="tile">
+            <div class="badge b2">AtlasWorld</div>
+            <h3>Images on a sphere</h3>
+            <p>
+              Users place images and tags on spherical coordinates. The archive arranges itself within that bounded world.
+              Best-ranked worlds become training exemplars.
+            </p>
+          </div>
+          <div class="tile">
+            <div class="badge b6">Genesis Engine</div>
+            <h3>Coordinate-driven transformation</h3>
+            <p>
+              Drop an image at a coordinate and the system alters it toward what typically lives there,
+              guided by millions of prior globes and user preferences.
+            </p>
+          </div>
+          <div class="tile">
+            <div class="badge b3">Highlighting meaning</div>
+            <h3>Most-chosen clusters become lessons</h3>
+            <p>
+              The system tracks which clusters are frequently visited, bookmarked, or loved.
+              It can recommend coordinates with human-readable “reasons.”
+            </p>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="grid">
+          <div class="card pad span6">
+            <div class="subhead">Style by region</div>
+            <h2>Different hemispheres, different aesthetics</h2>
+            <p class="lead">
+              Regions can carry preferred styles. A world can be published, populated by users,
+              and the best-ranked worlds become training seeds.
+              “Style geography” becomes a platform feature.
+            </p>
+            <ul class="clean">
+              <li>Coordinates can represent aesthetic rules (palette, texture, composition, tone)</li>
+              <li>Users can publish worlds as shareable artifacts</li>
+              <li>Top worlds feed training and recommendation systems</li>
+            </ul>
+          </div>
+
+          <div class="card pad span6">
+            <div class="subhead">Profile-driven discovery</div>
+            <h2>Bookmarks become preference signals</h2>
+            <p class="lead">
+              The system builds a taste profile from actions users already understand:
+              <b>save</b>, <b>love</b>, <b>bookmark</b>, <b>time spent</b>.
+              Then it can predict what you’ll likely love in new generations and clusters.
+            </p>
+            <ul class="clean">
+              <li>Non-invasive by default: preference from explicit actions</li>
+              <li>Optional advanced signals must be opt-in and clearly explained</li>
+              <li>Users can organize their own libraries with tags for stronger personalization</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VR SLICES + PORTALS -->
+    <section id="vr">
+      <div class="card pad">
+        <div class="subhead">Investor demo layer</div>
+        <h2>VR Slices: turning meaning into traversable worlds</h2>
+        <p class="lead">
+          A slice is a 2D plane taken from the sphere at chosen coordinates (x, y). No depth required.
+          The slice contains a curated neighborhood of images that share a motif fingerprint.
+          An AI interprets the slice as a coherent “place” and spreads landmarks across a walkable world.
+        </p>
+
+        <div class="tiles">
+          <div class="tile">
+            <div class="badge b1">Slice</div>
+            <h3>40-neighbor neighborhood</h3>
+            <p>
+              Select a coordinate and open a neighborhood slice, then render it as a world of landmarks:
+              buildings, objects, characters, motifs, and routes.
+            </p>
+          </div>
+          <div class="tile">
+            <div class="badge b3">Coherence</div>
+            <h3>System-level interpretation</h3>
+            <p>
+              The AI sees the slice holistically, then arranges related elements near each other:
+              pump near pump-like building near pump-like vehicle.
+            </p>
+          </div>
+          <div class="tile">
+            <div class="badge b2">Traversal</div>
+            <h3>Walk, ride, drift</h3>
+            <p>
+              The user traverses by foot, vehicle, or themed motion.
+              Meaning becomes geography, not a grid.
+            </p>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="grid">
+          <div class="card pad span6">
+            <div class="subhead">Portals</div>
+            <h2>Portals are intersections, not teleportation</h2>
+            <p class="lead">
+              A portal exists where two slices overlap in motif space.
+              The form of the portal is generated from shared motifs:
+              fog gate, rabbit hole, mirror, tunnel, drain, door crack.
+              Transitions become <b>semantic continuity</b>.
+            </p>
+            <div class="diagram" aria-label="Portal logic">
+              Portal = Intersection(Slice A, Slice B)
+              <br/>Form = Function(shared motifs)
+              <br/>Result: travel through meaning, not menus
+            </div>
+          </div>
+
+          <div class="card pad span6">
+            <div class="subhead">Auto-naming</div>
+            <h2>Slices get names humans remember</h2>
+            <p class="lead">
+              The system names slices using motif density and tone:
+              searchable, memorable, and consistent.
+              Example: <span class="mono">creepy-cute-goth-gf-silent-hill-theme-haunted-disney</span>.
+            </p>
+            <ul class="clean">
+              <li>Names act as compressed semantic fingerprints</li>
+              <li>Users can bookmark regions by name and coordinate</li>
+              <li>Guided tours can be created: routes, notes, reasons</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMMUNITY + REWARDS (NON-INVASIVE) -->
+    <section id="community">
+      <div class="card pad">
+        <div class="subhead">Community engine</div>
+        <h2>Creative nudges, not invasions</h2>
+        <p class="lead">
+          Atlas improves when people label well. The system can reward meaningful, varied tagging
+          without requiring invasive tracking. The key is transparency and user benefit.
+        </p>
+
+        <div class="tiles">
+          <div class="tile">
+            <div class="badge b4">Nudge</div>
+            <h3>“You’ve used that tag 500 times”</h3>
+            <p>
+              The UI can suggest modifiers or new phrasing.
+              Users can continue, or add a variant that better captures nuance.
+            </p>
+          </div>
+          <div class="tile">
+            <div class="badge b3">Celebrate</div>
+            <h3>“You made a new tag”</h3>
+            <p>
+              Reward creativity with clear feedback: meaningful contributions are recognized,
+              and users feel they are building a shared atlas.
+            </p>
+          </div>
+          <div class="tile">
+            <div class="badge b2">Quality</div>
+            <h3>“That’s not sensical” (gentle)</h3>
+            <p>
+              A quality check can flag nonsense tags and encourage better phrasing.
+              The user stays in control. The goal is clarity, not punishment.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card pad span6">
+            <div class="subhead">Rewards</div>
+            <h2>Real benefits for meaningful tagging</h2>
+            <p class="lead">
+              Reward structure should be understandable and motivating:
+              small-to-us, meaningful-to-them.
+              Benefits can be credits, premium features, or early access to higher-quality generations.
+            </p>
+            <ul class="clean">
+              <li>Monthly goal: “Create 100 meaningful new tags” → unlock benefits</li>
+              <li>Human review can be explicit: users know quality is evaluated</li>
+              <li>Rewards align with user value: better organization, better discovery, better generations</li>
+            </ul>
+          </div>
+
+          <div class="card pad span6" id="ethics">
+            <div class="subhead">Trust</div>
+            <h2>Privacy and consent as a feature</h2>
+            <p class="lead">
+              Atlas can function fully with non-invasive signals (save, love, bookmark, time-in-view).
+              Anything beyond that must be opt-in, explained, and beneficial to the user.
+            </p>
+            <ul class="clean">
+              <li>Default: no camera, no biometrics, no hidden tracking</li>
+              <li>Optional advanced feedback requires clear consent and clear payoff</li>
+              <li>Users can view, export, and delete their preference profile</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROADMAP -->
+    <section id="roadmap">
+      <div class="card pad">
+        <div class="subhead">Roadmap</div>
+        <h2>Build order that makes the vision real</h2>
+        <p class="lead">
+          The project scales from a practical organizer into a universe engine.
+          Each step yields a standalone product and also feeds the next step’s training.
+        </p>
+
+        <div class="tiles">
+          <div class="tile">
+            <div class="badge b1">Phase 1</div>
+            <h3>Atlas v1 (Field → Columns)</h3>
+            <p>Core embeddings, tag field, heat, anchors, column formation, explainable metadata, exportable signatures.</p>
+          </div>
+          <div class="tile">
+            <div class="badge b2">Phase 2</div>
+            <h3>Atlas Sphere v2</h3>
+            <p>Bounded sphere placement, bookmarking, region naming, neighborhood clicks, and cartography tools.</p>
+          </div>
+          <div class="tile">
+            <div class="badge b6">Phase 3</div>
+            <h3>Atlas Dimensions v3</h3>
+            <p>Multi-tag XY micro-field shaping, multi-column intersections, depth carousel, and side-profile comparisons.</p>
+          </div>
+          <div class="tile">
+            <div class="badge b3">Phase 4</div>
+            <h3>D10 Book-Dice pipeline</h3>
+            <p>Text→tags→columns. Human curation loop. 1M+ training exemplars. Robust generalization to any book.</p>
+          </div>
+          <div class="tile">
+            <div class="badge b6">Phase 5</div>
+            <h3>Atlas Genesis</h3>
+            <p>Coordinate-driven transformation: drop an image, get what belongs there. Style regions and world publishing.</p>
+          </div>
+          <div class="tile">
+            <div class="badge b1">Phase 6</div>
+            <h3>VR Slices + Portals</h3>
+            <p>Slice-as-world. Landmark generation. Intersection portals. Searchless traversal through named motif space.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;">
+        <div>
+          <b>Atlas Project</b> — <span style="color:rgba(255,255,255,.72)">Cartographers of Meaning</span>
+          <span style="color:rgba(255,255,255,.32)">|</span>
+          <span style="color:rgba(255,255,255,.60)">Geometry of Meaning as a platform.</span>
+        </div>
+        <div class="mono" style="color:rgba(255,255,255,.45)">
+          Atlas v1 • Sphere v2 • Dimensions v3 • D10 • Genesis • VR Slices
+        </div>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
