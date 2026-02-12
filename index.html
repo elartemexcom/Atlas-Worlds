@@ -1,0 +1,645 @@
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Atlas Project Proposal (v1.0 → v3.0)</title>
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --panel:rgba(255,255,255,.06);
+      --panel2:rgba(255,255,255,.04);
+      --border:rgba(255,255,255,.12);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.62);
+      --accent:#7ee787;
+      --accent2:#79c0ff;
+      --warn:#ffa657;
+      --danger:#ff7b72;
+      --shadow: 0 18px 60px rgba(0,0,0,.35);
+      --radius:18px;
+      --radius2:26px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1100px 700px at 12% -10%, rgba(121,192,255,.16), transparent 70%),
+        radial-gradient(900px 600px at 90% 10%, rgba(126,231,135,.12), transparent 70%),
+        radial-gradient(1100px 900px at 55% 120%, rgba(255,166,87,.10), transparent 70%),
+        var(--bg);
+      line-height:1.5;
+    }
+    a{color:var(--accent2); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+      padding:28px 18px 60px;
+    }
+    header{
+      padding:18px 0 24px;
+      display:flex;
+      gap:18px;
+      align-items:flex-start;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      min-width:290px;
+    }
+    .title{
+      font-size:32px;
+      letter-spacing:.2px;
+      margin:0;
+    }
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      max-width:60ch;
+    }
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+    .chip{
+      border:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:13px;
+      color:rgba(255,255,255,.82);
+      backdrop-filter: blur(6px);
+    }
+    .chip strong{color:white}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+    }
+    @media (min-width: 980px){
+      .grid.cols-2{grid-template-columns: 1.2fr .8fr;}
+      .grid.cols-3{grid-template-columns: 1fr 1fr 1fr;}
+    }
+    section{
+      margin-top:18px;
+    }
+    .card{
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:16px 18px 10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .card .hd h2, .card .hd h3{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.2px;
+    }
+    .card .hd .meta{
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .card .bd{
+      padding:14px 18px 18px;
+      color:rgba(255,255,255,.86);
+    }
+    .card .bd p{margin:10px 0}
+    .muted{color:var(--muted)}
+    .kpi{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .kpi .pill{
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.16);
+      padding:8px 10px;
+      border-radius:12px;
+      min-width:180px;
+      flex:1;
+    }
+    .kpi .pill .lbl{font-size:12px; color:var(--muted)}
+    .kpi .pill .val{font-size:14px; font-weight:650; margin-top:3px; color:#fff}
+    .tag{
+      display:inline-block;
+      font-family:var(--mono);
+      font-size:12px;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.18);
+      color:rgba(255,255,255,.88);
+      margin:2px 6px 2px 0;
+      vertical-align:middle;
+    }
+    .tag.accent{border-color:rgba(126,231,135,.45); color:rgba(126,231,135,.95); background:rgba(126,231,135,.08)}
+    .tag.blue{border-color:rgba(121,192,255,.55); color:rgba(121,192,255,.95); background:rgba(121,192,255,.08)}
+    .tag.warn{border-color:rgba(255,166,87,.55); color:rgba(255,166,87,.95); background:rgba(255,166,87,.08)}
+    .tag.danger{border-color:rgba(255,123,114,.55); color:rgba(255,123,114,.95); background:rgba(255,123,114,.08)}
+    ul{margin:10px 0 0 18px}
+    li{margin:6px 0}
+    .callout{
+      border:1px solid rgba(121,192,255,.28);
+      background:rgba(121,192,255,.08);
+      border-radius:14px;
+      padding:12px 12px;
+      margin-top:12px;
+    }
+    .callout strong{color:#fff}
+    .hr{
+      height:1px;
+      background:rgba(255,255,255,.10);
+      margin:18px 0;
+    }
+    .mono{
+      font-family:var(--mono);
+      font-size:12.5px;
+      background:rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:14px;
+      padding:12px 12px;
+      overflow:auto;
+      color:rgba(255,255,255,.88);
+    }
+    .twoCol{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+    @media (min-width: 900px){
+      .twoCol{grid-template-columns:1fr 1fr;}
+    }
+    .toc a{display:block; padding:6px 8px; border-radius:10px;}
+    .toc a:hover{background:rgba(255,255,255,.06)}
+    .small{font-size:12px}
+    .foot{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:16px;
+      line-height:1.6;
+    }
+    .badgeRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+    .badge{
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.18);
+      padding:8px 10px;
+      border-radius:14px;
+      font-size:12px;
+      color:rgba(255,255,255,.84);
+    }
+    .badge b{color:#fff}
+    .h1{
+      font-size:22px;
+      margin:0 0 6px;
+      letter-spacing:.2px;
+    }
+    .note{
+      font-size:12.5px;
+      color:rgba(255,255,255,.78);
+      border-left:3px solid rgba(126,231,135,.55);
+      padding-left:10px;
+      margin:10px 0 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <h1 class="title">Atlas Project Proposal</h1>
+        <p class="subtitle">
+          A professional overview of the full system vision, from <b>Atlas v1.0</b> (image similarity mapping),
+          to <b>Atlas v2.0</b> (sphere-based world navigation), to <b>Atlas v3.0</b> (<b>Atlas Dimensions</b>,
+          multi-tag gravity fields, depth carousels, and axis-layer traversal).
+        </p>
+      </div>
+      <div class="chips" aria-label="Highlights">
+        <span class="chip"><strong>Core</strong> Spatial Intelligence</span>
+        <span class="chip"><strong>UI</strong> Depth Carousel + Axis Scroll</span>
+        <span class="chip"><strong>Data</strong> Tag Field + Coordinates</span>
+        <span class="chip"><strong>Model</strong> Gradient Columns</span>
+        <span class="chip"><strong>Ethical</strong> Non-invasive Nudges</span>
+      </div>
+    </header>
+
+    <section class="grid cols-2">
+      <div class="card">
+        <div class="hd">
+          <h2>Executive Summary</h2>
+          <div class="meta">Readable in one pass</div>
+        </div>
+        <div class="bd">
+          <p>
+            <b>Atlas</b> turns image archives into a navigable, similarity-driven space where users explore by
+            <b>relationship</b> instead of file paths. It replaces static folders and grids with
+            <b>clusters</b>, <b>columns</b>, and <b>gravity fields</b>.
+          </p>
+          <p>
+            Across three versions, Atlas evolves from a clean image-to-image map into a full
+            <b>dimensional organization system</b> where <span class="tag blue">tags</span> live on an
+            <b>XY field</b>, pull images with adjustable <span class="tag warn">heat</span>, and generate
+            multi-column structures that can be explored by <b>depth</b> using <b>layer scrolling</b> and
+            <b>axis views</b>.
+          </p>
+
+          <div class="kpi">
+            <div class="pill">
+              <div class="lbl">Core UI metaphor</div>
+              <div class="val">Cluster of Meaning</div>
+            </div>
+            <div class="pill">
+              <div class="lbl">Core output object</div>
+              <div class="val">Gradient Column (Closest → Furthest)</div>
+            </div>
+            <div class="pill">
+              <div class="lbl">Core control surface</div>
+              <div class="val">XY Tag Field + Heat Controls</div>
+            </div>
+          </div>
+
+          <div class="callout">
+            <strong>Key claim:</strong> Atlas aligns digital organization with how visual minds actually think,
+            in <b>clusters, gradients, and intersections</b>, not lists.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="hd">
+          <h3>Table of Contents</h3>
+          <div class="meta">Jump links</div>
+        </div>
+        <div class="bd toc">
+          <a href="#terms"><b>Key Terms</b> (unique project language)</a>
+          <a href="#v1"><b>Atlas v1.0</b>: Plain Image Atlas</a>
+          <a href="#v2"><b>Atlas v2.0</b>: Atlas Sphere</a>
+          <a href="#v3"><b>Atlas v3.0</b>: Atlas Dimensions</a>
+          <a href="#nav"><b>Navigation</b>: Depth Carousel + Axis Scroll</a>
+          <a href="#signals"><b>Non-invasive Creativity Nudges</b></a>
+          <a href="#data"><b>Data Model</b>: Coordinates, Markers, Metadata</a>
+          <a href="#ml"><b>Machine Learning</b>: Column Training Concept</a>
+        </div>
+        <div class="bd">
+          <p class="note">
+            This document focuses on the system itself, terminology, and the concrete mechanics that make it usable.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="terms" class="card">
+      <div class="hd">
+        <h2>Key Terms and Unique Features</h2>
+        <div class="meta">Atlas vocabulary</div>
+      </div>
+      <div class="bd twoCol">
+        <div>
+          <p><span class="tag accent">Cluster of Meaning</span> A navigable region of images that share a coherent visual or conceptual identity.</p>
+          <p><span class="tag accent">Gravity Well</span> A force-like pull created by images and tags that draws related images toward a region or column.</p>
+          <p><span class="tag blue">XY Tag Field</span> A 2D plane where tags can be positioned. Tag proximity reshapes how columns and intersections form.</p>
+          <p><span class="tag warn">Heat</span> A weight on a tag that increases its pull. Higher heat absorbs more images into that tag’s influence.</p>
+          <p><span class="tag blue">Column</span> A ranked vertical sequence of images, typically from <b>closest</b> to <b>furthest</b> relative to an anchor concept.</p>
+        </div>
+        <div>
+          <p><span class="tag accent">Stalactites</span> A visual metaphor for multi-column formations that appear beneath tag intersections, like hanging icicles.</p>
+          <p><span class="tag blue">Depth Carousel</span> A UI control that lets users scroll through layers (top to bottom) of a column or cluster.</p>
+          <p><span class="tag blue">Axis Scroll</span> Viewing the cluster from different perspectives: <b>Z-layer overview</b>, plus side views for comparison.</p>
+          <p><span class="tag accent">Unique Complex Marker</span> A compact identifier describing a column’s tag configuration, positions, and heats.</p>
+          <p><span class="tag accent">Coordinate Descriptor</span> Metadata that explains an image’s relationship to <b>all tags</b>, not just nearest tags.</p>
+        </div>
+      </div>
+      <div class="bd">
+        <div class="mono" aria-label="At-a-glance mechanics">
+          <b>At-a-glance:</b>
+          Tags are placed in XY space → tags have heat → heat + proximity reshapes gravity → gravity forms columns and intersections →
+          depth carousel lets you traverse from strongest matches to weakest matches → axis views let you compare columns and slices.
+        </div>
+      </div>
+    </section>
+
+    <section id="v1" class="card">
+      <div class="hd">
+        <h2>Atlas v1.0: Plain Image Atlas</h2>
+        <div class="meta">Foundational version</div>
+      </div>
+      <div class="bd">
+        <p class="h1">What v1.0 does</p>
+        <p>
+          Atlas v1.0 is a clean, modern replacement for folder browsing. Users pick an image as a hub, and Atlas returns the
+          closest images by similarity. This creates an immediate, intuitive sense of “what belongs near what”.
+        </p>
+
+        <div class="badgeRow">
+          <span class="badge"><b>Input</b>: Images</span>
+          <span class="badge"><b>Output</b>: Similarity neighbors</span>
+          <span class="badge"><b>UI</b>: Hub-based exploration</span>
+          <span class="badge"><b>Core value</b>: Fast discovery</span>
+        </div>
+
+        <div class="hr"></div>
+
+        <p><b>Unique v1.0 features</b></p>
+        <ul>
+          <li><b>Hub Selection</b>: click an image to make it the center of gravity</li>
+          <li><b>Similarity Field</b>: nearby images appear closer; distant ones farther</li>
+          <li><b>Cluster of Meaning</b>: users can “walk” through similarity neighborhoods</li>
+        </ul>
+
+        <div class="callout">
+          <strong>Investor-simple explanation:</strong> v1.0 replaces “where is the file?” with “what is closest to this idea?”
+        </div>
+      </div>
+    </section>
+
+    <section id="v2" class="card">
+      <div class="hd">
+        <h2>Atlas v2.0: Atlas Sphere</h2>
+        <div class="meta">World navigation layer</div>
+      </div>
+      <div class="bd">
+        <p class="h1">What v2.0 adds</p>
+        <p>
+          Atlas v2.0 introduces a sphere-based navigation metaphor for exploring large archives as a continuous world.
+          Instead of a flat map, images can be explored through spherical “slices” around a chosen axis, creating an intuitive
+          sense of direction, neighborhood, and distance.
+        </p>
+
+        <div class="badgeRow">
+          <span class="badge"><b>New</b>: World surface navigation</span>
+          <span class="badge"><b>New</b>: Local slice view (around a coordinate)</span>
+          <span class="badge"><b>New</b>: Coordinate + text pairing</span>
+          <span class="badge"><b>Goal</b>: Explore by place, not filename</span>
+        </div>
+
+        <div class="hr"></div>
+
+        <p><b>Key v2.0 mechanics</b></p>
+        <ul>
+          <li><b>Sphere Coordinates</b>: images can be associated to points on a globe-like surface</li>
+          <li><b>Slice View</b>: click a point and display a ring or patch of nearby images (example: ~40 neighbors)</li>
+          <li><b>Scrolling Exploration</b>: smoothly travel to nearby regions, rather than jumping lists</li>
+        </ul>
+
+        <div class="callout">
+          <strong>What v2.0 is for:</strong> making a huge archive feel like a place you can traverse and remember.
+        </div>
+      </div>
+    </section>
+
+    <section id="v3" class="card">
+      <div class="hd">
+        <h2>Atlas v3.0: Atlas Dimensions</h2>
+        <div class="meta">Full dimensional gravity system</div>
+      </div>
+      <div class="bd">
+        <p class="h1">What v3.0 adds</p>
+        <p>
+          Atlas v3.0 is where the system becomes a true spatial intelligence engine. Tags are no longer static labels.
+          They live in an <b>XY Tag Field</b>, can be moved to reshape influence, and can be “heated” to pull more images into their orbit.
+          Under these tags, Atlas forms <b>multi-column stalactites</b> at intersections, producing structured gradients that are navigable by depth.
+        </p>
+
+        <div class="badgeRow">
+          <span class="badge"><b>New</b>: XY Tag Field (move tags)</span>
+          <span class="badge"><b>New</b>: Tag Heat Controls</span>
+          <span class="badge"><b>New</b>: Multi-column intersections</span>
+          <span class="badge"><b>New</b>: Depth Carousel + Axis Scroll</span>
+          <span class="badge"><b>New</b>: Column comparisons (side-by-side)</span>
+        </div>
+
+        <div class="hr"></div>
+
+        <p><b>How multi-column stalactites form</b></p>
+        <p class="muted">
+          Think of each tag as a “gravitational body” placed in a 2D field. When tags are close, they create strong combined influence.
+          The system generates columns under these influence points. When multiple tag influences intersect, you get multiple columns (stalactites)
+          that reflect the strongest match to the primary tag and secondary alignment to nearby tags.
+        </p>
+
+        <div class="twoCol">
+          <div class="mono">
+            <b>Example:</b> Tag placement changes output
+            <br><br>
+            If <span class="tag blue">texture</span> sits between <span class="tag blue">size</span> and <span class="tag blue">opacity</span>,
+            columns generated under texture will preferentially align with both size and opacity
+            (while still maximizing texture as the primary target).
+            <br><br>
+            Move texture farther away and the intersection weakens, producing different columns.
+          </div>
+          <div class="mono">
+            <b>Heat meaning (non-invasive, intuitive):</b>
+            <br><br>
+            Default heat values produce the “truest” placement relative to the field.
+            Increasing heat on a tag pulls more images toward that tag’s region, even away from competing tags.
+            <br><br>
+            In UI terms: heat increases “mass” and enlarges that tag’s capture radius.
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Outcome:</strong> no tag is inert. Every tag affects the formation of columns and intersections through position and heat.
+        </div>
+      </div>
+    </section>
+
+    <section id="nav" class="card">
+      <div class="hd">
+        <h2>Navigation: Depth Carousel + Axis Scrolling</h2>
+        <div class="meta">How users explore the structure</div>
+      </div>
+      <div class="bd">
+        <p class="h1">Depth Carousel (scroll through layers)</p>
+        <p>
+          Each column is a ranked gradient from <b>closest</b> to <b>furthest</b> relative to an anchor (image, tag, or multi-tag intersection).
+          Users traverse this depth using a carousel dial:
+        </p>
+        <ul>
+          <li><b>Large dial</b>: move layer-by-layer through the entire column or cluster depth</li>
+          <li><b>Small dial</b>: when a column is selected, move image-by-image within that single column</li>
+          <li><b>Numeric input</b>: jump directly to a depth index (example: 172 of 1,240)</li>
+        </ul>
+
+        <div class="hr"></div>
+
+        <p class="h1">Axis Scrolling (see structure from multiple viewpoints)</p>
+        <p>
+          Atlas provides multiple viewpoints to make complex clusters understandable:
+        </p>
+        <ul>
+          <li><b>Z-dimension layer overview</b>: a top-down view of the “surface” layer, then step down by depth</li>
+          <li><b>X-dimension layer overview</b>: a side view to understand column height and density</li>
+          <li><b>Y-dimension layer overview</b>: another side perspective, useful for comparing adjacent columns</li>
+          <li><b>Column-by-column comparison</b>: pin columns side-by-side to compare gradients directly</li>
+        </ul>
+
+        <div class="mono">
+          <b>Practical meaning:</b>
+          <br><br>
+          Z overview helps you understand the “top layer” of strongest matches.
+          Side views help you see how deep and dense a column is.
+          Column comparison helps you decide which branch truly fits a concept better.
+        </div>
+      </div>
+    </section>
+
+    <section id="signals" class="card">
+      <div class="hd">
+        <h2>Non-invasive Creativity Nudges</h2>
+        <div class="meta">Creative guidance without surveillance</div>
+      </div>
+      <div class="bd">
+        <p class="h1">Tag Saturation Prompt</p>
+        <p>
+          To encourage variety and precision without policing creativity, Atlas offers gentle prompts based on a user’s tag history:
+        </p>
+        <div class="mono">
+          “You’ve used this tag <b>500</b> times. Continue, or add a modifier?”
+          <br><br>
+          If user adds a meaningful modifier:
+          <br>
+          “You’ve made a new tag. Congratulations.”
+        </div>
+
+        <p class="h1">Sensical Tag Check (optional)</p>
+        <p>
+          Atlas can optionally flag nonsensical or non-differentiating tags, while still allowing overrides:
+        </p>
+        <div class="mono">
+          “That’s not sensical.”
+          <br>
+          “This tag overlaps 92% with an existing tag. Refine?”
+          <br>
+          “Proceed anyway?”
+        </div>
+
+        <div class="callout">
+          <strong>Design principle:</strong> nudges are optional, transparent, and never invasive. Users remain in control.
+        </div>
+      </div>
+    </section>
+
+    <section id="data" class="card">
+      <div class="hd">
+        <h2>Data Model: What Each Image Carries</h2>
+        <div class="meta">To keep the system inspectable</div>
+      </div>
+      <div class="bd">
+        <p class="h1">Per-image metadata (core)</p>
+        <ul>
+          <li><b>Tag-field coordinate</b>: where it sits relative to the XY tag field</li>
+          <li><b>Unique Complex Marker</b>: compact identifier describing the column configuration</li>
+          <li><b>Descriptor</b>: explains relationship to all tags, not just the nearest two</li>
+          <li><b>Context snapshot</b>: which tags were active, their XY positions, and their heats</li>
+        </ul>
+
+        <p class="h1">Per-column metadata (core)</p>
+        <ul>
+          <li><b>Primary driver</b>: which tag or image anchor created the column</li>
+          <li><b>Neighbor tag layout</b>: which tags were nearby and how close they were</li>
+          <li><b>Heat map</b>: tag heats used to generate this structure</li>
+          <li><b>Depth statistics</b>: length, density zones, and discontinuity points</li>
+        </ul>
+
+        <div class="mono">
+          <b>Why this matters:</b>
+          Without metadata, a spatial system feels like a magic trick.
+          With metadata, Atlas becomes a readable instrument.
+        </div>
+      </div>
+    </section>
+
+    <section id="ml" class="card">
+      <div class="hd">
+        <h2>Machine Learning: Gradient Columns as Training Data</h2>
+        <div class="meta">How Atlas becomes smarter</div>
+      </div>
+      <div class="bd">
+        <p class="h1">Anchor Pair → Model Gradient → Curated Column</p>
+        <p>
+          Atlas can train models using a consistent artifact: the <b>Gradient Column</b>.
+          Human curators provide two endpoints:
+        </p>
+        <ul>
+          <li><b>Top Anchor</b>: the closest image to the target concept</li>
+          <li><b>Bottom Anchor</b>: the furthest image still meaningfully connected</li>
+        </ul>
+        <p>
+          The model generates 10 to 20 images between the anchors, then users curate the best ordering. The result is a
+          structured, distance-aware dataset that teaches models how “meaning fades” over depth.
+        </p>
+
+        <div class="callout">
+          <strong>Training outcome:</strong> models learn not just what a concept looks like, but what it looks like at different distances.
+        </div>
+
+        <p class="h1">Why this is better than basic tagging</p>
+        <ul>
+          <li>Tagging labels identity. Gradient columns label <b>distance and decay</b>.</li>
+          <li>Columns create stable supervision for ranking, recommendation, and generation.</li>
+          <li>User curation provides consensus structure, not single-person noise.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="hd">
+        <h2>Conclusion</h2>
+        <div class="meta">What someone should remember</div>
+      </div>
+      <div class="bd">
+        <p>
+          Atlas evolves from a powerful similarity browser into a full spatial cognition engine:
+        </p>
+        <ul>
+          <li><b>v1.0</b>: Image similarity mapping and hub-based navigation</li>
+          <li><b>v2.0</b>: Sphere-based world navigation and slice exploration</li>
+          <li><b>v3.0</b>: Atlas Dimensions: XY tag field, heat controls, multi-column stalactites, and depth + axis traversal</li>
+        </ul>
+
+        <div class="callout">
+          <strong>Bottom line:</strong> Atlas turns archives into <b>fields and forces</b>. It makes meaning navigable.
+        </div>
+
+        <p class="foot">
+          This page is intentionally written to be understandable to new readers. It highlights unique Atlas terms and provides concrete
+          mechanics for depth carousel scrolling and axis-layer exploration.
+        </p>
+      </div>
+    </section>
+
+    <p class="foot">
+      Tip: You can paste this file into a single <span class="tag">atlas-proposal.html</span> and open it in any browser.
+      If you want, I can also provide a version with a sticky sidebar, collapsible sections, and a print-to-PDF layout.
+    </p>
+  </div>
+</body>
+</html>
+```
