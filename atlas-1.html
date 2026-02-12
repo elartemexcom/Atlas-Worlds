@@ -3,434 +3,695 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Atlas — A Spatial Intelligence Engine for Images</title>
+  <title>Atlas — Spatial Tag Field → Image Formations</title>
+  <meta name="description" content="Atlas: place tags in an XY field, tune Heat, optionally add anchor images, and let images settle into stalagmite columns. Futuristic, readable, at-a-glance explainer." />
   <style>
     :root{
-      --bg:#0b0c10;
+      --bg0:#070913;
+      --bg1:#0b1022;
       --panel:rgba(255,255,255,.06);
-      --panel2:rgba(255,255,255,.04);
-      --border:rgba(255,255,255,.12);
+      --panel2:rgba(255,255,255,.035);
+      --border:rgba(255,255,255,.10);
       --text:rgba(255,255,255,.92);
       --muted:rgba(255,255,255,.68);
       --muted2:rgba(255,255,255,.52);
-      --accent:#7dd3fc;
-      --accent2:#a78bfa;
-      --good:#34d399;
-      --warn:#fbbf24;
-      --bad:#fb7185;
-      --shadow: 0 12px 40px rgba(0,0,0,.45);
+
+      --cyan:#4fd1ff;
+      --violet:#a78bfa;
+      --mint:#34d399;
+      --amber:#fbbf24;
+      --rose:#fb7185;
+
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
       --radius: 18px;
       --radius2: 26px;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
+
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      font-family: var(--sans);
       color:var(--text);
       background:
-        radial-gradient(1200px 800px at 18% 0%, rgba(167,139,250,.18), transparent 60%),
-        radial-gradient(900px 700px at 85% 15%, rgba(125,211,252,.14), transparent 60%),
-        radial-gradient(800px 600px at 50% 120%, rgba(52,211,153,.10), transparent 55%),
-        var(--bg);
-      line-height:1.45;
+        radial-gradient(1200px 800px at 14% 0%, rgba(167,139,250,.18), transparent 60%),
+        radial-gradient(1000px 800px at 85% 10%, rgba(79,209,255,.14), transparent 62%),
+        radial-gradient(900px 700px at 40% 110%, rgba(52,211,153,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      letter-spacing: .1px;
+      line-height: 1.45;
     }
-    a{color:var(--accent); text-decoration:none}
+
+    a{color:var(--cyan); text-decoration:none}
     a:hover{text-decoration:underline}
-    .wrap{max-width:1120px; margin:0 auto; padding:28px 18px 80px}
-    header{
+    .wrap{max-width:1180px; margin:0 auto; padding:28px 18px 84px}
+
+    /* Top bar */
+    .top{
       display:flex; align-items:center; justify-content:space-between;
-      gap:14px; padding:10px 6px 22px;
+      gap:14px; padding:10px 6px 18px;
+      position:sticky; top:0; z-index:20;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(7,9,19,.72), rgba(7,9,19,.28));
+      border-bottom:1px solid rgba(255,255,255,.06);
     }
     .brand{
       display:flex; align-items:center; gap:10px;
-      font-weight:700; letter-spacing:.2px;
+      font-weight:800; letter-spacing:.2px;
     }
-    .dot{
-      width:12px; height:12px; border-radius:999px;
-      background: conic-gradient(from 0deg, var(--accent), var(--accent2), var(--good), var(--accent));
-      box-shadow: 0 0 0 4px rgba(125,211,252,.12);
+    .spark{
+      width:14px; height:14px; border-radius:999px;
+      background: conic-gradient(from 0deg, var(--cyan), var(--violet), var(--mint), var(--cyan));
+      box-shadow: 0 0 0 5px rgba(79,209,255,.10);
     }
-    nav{display:flex; gap:14px; flex-wrap:wrap}
-    nav a{color:var(--muted)}
-    nav a:hover{color:var(--text)}
-    .hero{
-      display:grid; grid-template-columns: 1.25fr .85fr;
-      gap:18px; align-items:stretch;
+    .nav{display:flex; gap:14px; flex-wrap:wrap}
+    .nav a{
+      color:var(--muted);
+      font-weight:600;
+      font-size:13px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid transparent;
     }
-    @media (max-width: 920px){
-      .hero{grid-template-columns:1fr}
+    .nav a:hover{
+      color:var(--text);
+      border-color: rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      text-decoration:none;
     }
+
+    /* Cards */
     .card{
       background: linear-gradient(180deg, var(--panel), var(--panel2));
       border:1px solid var(--border);
       border-radius: var(--radius2);
       box-shadow: var(--shadow);
     }
-    .hero-main{padding:26px 22px}
-    .kicker{
-      display:inline-flex; gap:10px; align-items:center;
-      padding:7px 12px; border-radius:999px;
-      background: rgba(125,211,252,.10);
-      border:1px solid rgba(125,211,252,.20);
-      color:var(--muted);
-      font-size:13px;
+    .pad{padding:18px}
+    .pad-xl{padding:26px 22px}
+
+    /* Hero */
+    .hero{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:16px;
+      align-items:stretch;
+      margin-top:8px;
     }
+    @media (max-width: 940px){ .hero{grid-template-columns:1fr} }
+
+    .kicker{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:7px 12px; border-radius:999px;
+      background: rgba(79,209,255,.10);
+      border:1px solid rgba(79,209,255,.22);
+      color: var(--muted);
+      font-size:13px;
+      font-weight:600;
+      width:max-content;
+    }
+    .kdot{
+      width:8px; height:8px; border-radius:999px;
+      background: var(--cyan);
+      box-shadow: 0 0 18px rgba(79,209,255,.65);
+    }
+
     h1{
       margin:14px 0 10px;
-      font-size:44px;
-      line-height:1.06;
-      letter-spacing:-.6px;
+      font-size:46px;
+      line-height:1.03;
+      letter-spacing:-.8px;
     }
-    @media (max-width: 520px){
-      h1{font-size:36px}
-    }
-    .sub{
+    @media (max-width: 520px){ h1{font-size:36px} }
+
+    .lead{
       color:var(--muted);
       font-size:16px;
-      max-width:66ch;
+      max-width: 72ch;
+      margin: 0;
     }
-    .cta-row{display:flex; gap:12px; flex-wrap:wrap; margin-top:18px}
+
+    /* Emphasis terms */
+    .term{
+      font-weight:800;
+      letter-spacing:.1px;
+      padding:2px 8px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      display:inline-block;
+      margin: 2px 4px 2px 0;
+      white-space:nowrap;
+    }
+    .t-cyan{ color: rgba(79,209,255,.95); border-color: rgba(79,209,255,.25); background: rgba(79,209,255,.08);}
+    .t-violet{ color: rgba(167,139,250,.96); border-color: rgba(167,139,250,.25); background: rgba(167,139,250,.08);}
+    .t-mint{ color: rgba(52,211,153,.96); border-color: rgba(52,211,153,.25); background: rgba(52,211,153,.08);}
+    .t-amber{ color: rgba(251,191,36,.95); border-color: rgba(251,191,36,.25); background: rgba(251,191,36,.08);}
+    .t-rose{ color: rgba(251,113,133,.95); border-color: rgba(251,113,133,.25); background: rgba(251,113,133,.08);}
+
+    .cta-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px}
     .btn{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:10px 14px; border-radius: 12px;
-      border:1px solid var(--border);
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      padding:10px 14px; border-radius: 14px;
+      border:1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.06);
       color:var(--text);
-      font-weight:600;
+      font-weight:800;
+      font-size:13px;
+      letter-spacing:.2px;
     }
     .btn.primary{
-      border-color: rgba(125,211,252,.42);
-      background: rgba(125,211,252,.12);
-      box-shadow: 0 0 0 6px rgba(125,211,252,.07);
+      border-color: rgba(79,209,255,.42);
+      background: rgba(79,209,255,.12);
+      box-shadow: 0 0 0 7px rgba(79,209,255,.07);
     }
-    .btn:hover{filter:brightness(1.08)}
-    .hero-side{padding:18px}
+    .btn:hover{filter:brightness(1.08); text-decoration:none}
+
+    /* Side stack */
+    .stack{display:grid; gap:12px}
     .mini{
-      padding:14px; border-radius: var(--radius);
+      padding:14px;
+      border-radius: var(--radius);
       background: rgba(0,0,0,.22);
       border:1px solid rgba(255,255,255,.10);
     }
-    .mini h3{margin:0 0 8px; font-size:14px; color:var(--muted)}
+    .mini h3{
+      margin:0 0 6px;
+      font-size:13px;
+      color:var(--muted);
+      font-weight:900;
+      letter-spacing:.35px;
+      text-transform:uppercase;
+    }
     .mini p{margin:0; color:var(--muted2); font-size:13px}
-    .stack{display:grid; gap:12px}
+
+    /* Layout grid */
     .grid{
-      display:grid; grid-template-columns: repeat(12, 1fr);
-      gap:14px; margin-top:18px;
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:14px;
+      margin-top:18px;
     }
-    .span6{grid-column: span 6}
-    .span5{grid-column: span 5}
-    .span7{grid-column: span 7}
     .span12{grid-column: span 12}
-    @media (max-width: 920px){
-      .span6,.span5,.span7{grid-column: span 12}
+    .span7{grid-column: span 7}
+    .span5{grid-column: span 5}
+    .span6{grid-column: span 6}
+    @media (max-width: 940px){
+      .span7,.span5,.span6{grid-column: span 12}
     }
-    section{margin-top:28px}
+
+    /* Section headers */
+    section{margin-top:22px}
     h2{
-      margin:0 0 10px;
-      font-size:26px; letter-spacing:-.2px;
+      margin:0 0 8px;
+      font-size:24px;
+      letter-spacing:-.25px;
     }
-    .lead{color:var(--muted); max-width:80ch; margin:0 0 12px}
-    .panel{padding:18px 18px}
-    .bullets{margin:10px 0 0; padding-left:18px; color:var(--muted)}
-    .bullets li{margin:6px 0}
-    .term-grid{
+    .subhead{
+      font-family: var(--mono);
+      font-size:12px;
+      color: rgba(255,255,255,.58);
+      letter-spacing:.6px;
+      text-transform:uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* Steps / At-a-glance */
+    .glance{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap:12px;
+      margin-top:14px;
+    }
+    @media (max-width: 1000px){ .glance{grid-template-columns: repeat(2, minmax(0,1fr));} }
+    @media (max-width: 560px){ .glance{grid-template-columns: 1fr;} }
+
+    .tile{
+      padding:14px;
+      border-radius: var(--radius);
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.20);
+      position:relative;
+      overflow:hidden;
+    }
+    .tile:before{
+      content:"";
+      position:absolute; inset:-40px -40px auto auto;
+      width:140px; height:140px;
+      background: radial-gradient(circle at 30% 30%, rgba(79,209,255,.18), transparent 60%);
+      transform: rotate(18deg);
+    }
+    .tile h3{
+      margin:0 0 6px;
+      font-size:16px;
+      letter-spacing:-.15px;
+    }
+    .tile p{margin:0; color:var(--muted); font-size:13px}
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:12px; font-weight:900;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.76);
+      margin-bottom:10px;
+      width:max-content;
+    }
+    .b1{border-color: rgba(79,209,255,.25); background: rgba(79,209,255,.07)}
+    .b2{border-color: rgba(167,139,250,.25); background: rgba(167,139,250,.07)}
+    .b3{border-color: rgba(52,211,153,.25); background: rgba(52,211,153,.07)}
+    .b4{border-color: rgba(251,191,36,.25); background: rgba(251,191,36,.07)}
+
+    /* Glossary */
+    .gloss{
       display:grid;
       grid-template-columns: repeat(2, minmax(0,1fr));
       gap:12px;
     }
-    @media (max-width: 760px){
-      .term-grid{grid-template-columns:1fr}
-    }
-    .term{
+    @media (max-width: 820px){ .gloss{grid-template-columns:1fr} }
+    .def{
       padding:14px;
       border-radius: var(--radius);
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
+      background: rgba(0,0,0,.20);
     }
-    .term b{display:block; margin-bottom:6px}
-    .term em{
-      font-style:normal;
-      color:rgba(125,211,252,.92);
+    .def .name{
+      display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+      margin-bottom:6px;
     }
-    .cols2{
-      display:grid; grid-template-columns: 1fr 1fr; gap:14px;
+    .def .name .big{
+      font-weight:1000;
+      letter-spacing:-.2px;
+      font-size:16px;
     }
-    @media (max-width: 900px){ .cols2{grid-template-columns:1fr} }
-    .tag{
-      display:inline-flex; align-items:center;
-      font-size:12px; padding:4px 9px; border-radius:999px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.06);
-      color:var(--muted);
-      margin-right:6px; margin-bottom:6px;
-      white-space:nowrap;
+    .def .name .hint{
+      font-family: var(--mono);
+      font-size:11px;
+      color: rgba(255,255,255,.55);
+      letter-spacing:.5px;
+      text-transform:uppercase;
     }
-    .hr{height:1px; background:rgba(255,255,255,.12); margin:18px 0}
-    footer{margin-top:34px; color:var(--muted2); font-size:12px}
-    .codebox{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    .def p{margin:0; color:var(--muted); font-size:13px}
+
+    /* Diagram */
+    .diagram{
+      font-family: var(--mono);
       font-size:12px;
+      line-height:1.5;
       color: rgba(255,255,255,.80);
       background: rgba(0,0,0,.34);
       border:1px solid rgba(255,255,255,.10);
       border-radius: var(--radius);
-      padding:12px 12px;
+      padding:12px;
       overflow:auto;
+    }
+    .diagram .k{color: rgba(79,209,255,.95)}
+    .diagram .v{color: rgba(167,139,250,.95)}
+    .diagram .m{color: rgba(52,211,153,.95)}
+    .diagram .a{color: rgba(251,191,36,.95)}
+
+    /* Big image placeholder */
+    .big-image{
+      border-radius: var(--radius2);
+      border:1px solid rgba(255,255,255,.12);
+      overflow:hidden;
+      position:relative;
+      min-height: 420px;
+      background:
+        radial-gradient(900px 520px at 25% 20%, rgba(79,209,255,.18), transparent 60%),
+        radial-gradient(900px 520px at 75% 30%, rgba(167,139,250,.14), transparent 62%),
+        radial-gradient(900px 520px at 50% 110%, rgba(52,211,153,.10), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      box-shadow: var(--shadow);
+    }
+    .big-image:after{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        linear-gradient(120deg, rgba(0,0,0,.45), rgba(0,0,0,.08), rgba(0,0,0,.45));
+      pointer-events:none;
+    }
+    .img-frame{
+      position:absolute; inset:18px;
+      border-radius: 20px;
+      border: 1px dashed rgba(255,255,255,.18);
+      background: rgba(0,0,0,.22);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:18px;
+    }
+    .img-frame .title{
+      font-size:18px;
+      font-weight:1000;
+      letter-spacing:-.2px;
+      margin-bottom:8px;
+    }
+    .img-frame .desc{
+      color: var(--muted);
+      font-size:13px;
+      max-width: 70ch;
+      margin: 0 auto;
+    }
+    .img-chip{
+      display:inline-flex; gap:8px; align-items:center;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      padding:6px 10px;
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size:11px;
+      color: rgba(255,255,255,.78);
+      margin-top: 14px;
+    }
+
+    footer{
+      margin-top:28px;
+      color: rgba(255,255,255,.50);
+      font-size:12px;
+      border-top:1px solid rgba(255,255,255,.10);
+      padding-top:14px;
     }
   </style>
 </head>
-
 <body>
   <div class="wrap">
-    <header>
+    <div class="top">
       <div class="brand">
-        <span class="dot" aria-hidden="true"></span>
+        <span class="spark" aria-hidden="true"></span>
         <span>Atlas</span>
       </div>
-      <nav>
-        <a href="#how">How it works</a>
+      <div class="nav">
+        <a href="#glance">At a glance</a>
+        <a href="#model">The model</a>
         <a href="#terms">Terms</a>
         <a href="#views">Views</a>
-        <a href="#scope">Scope</a>
-      </nav>
-    </header>
+        <a href="#image">Visual</a>
+      </div>
+    </div>
 
+    <!-- HERO -->
     <div class="hero">
-      <div class="card hero-main">
-        <div class="kicker">A spatial engine for visual meaning, not a folder system</div>
-        <h1>Place tags. Turn meaning into gravity. Let images settle.</h1>
-        <p class="sub">
-          Atlas is a visual organization system where <b>tags live in an XY field</b>, and your images
-          <b>arrange themselves underneath</b> based on how closely they match those tags and each other.
-          When forces overlap, <b>stalagmites form</b>: ranked columns of images that belong to that blend.
+      <div class="card pad-xl">
+        <div class="kicker"><span class="kdot"></span>Spatial Intelligence for Image Archives</div>
+
+        <h1>
+          Place <span class="term t-cyan">Tags</span> in an
+          <span class="term t-violet">XY Field</span>,
+          tune <span class="term t-amber">Heat</span>,
+          and let images form <span class="term t-mint">Stalagmites</span>.
+        </h1>
+
+        <p class="lead">
+          Atlas is an organization engine that thinks like a visual mind:
+          gradients, overlaps, crossroads. You don’t “file” images.
+          You sculpt a field of meaning, and your archive settles into shape.
         </p>
+
         <div class="cta-row">
-          <a class="btn primary" href="#how">See the idea in 60 seconds</a>
+          <a class="btn primary" href="#glance">See the whole idea instantly</a>
           <a class="btn" href="#terms">Learn the vocabulary</a>
-          <a class="btn" href="#scope">Explore the roadmap</a>
+          <a class="btn" href="#image">Jump to the visual</a>
         </div>
-        <div class="hr"></div>
-        <p class="sub" style="margin:0">
-          The point is simple: stop asking “where is the file?” and start asking “what belongs near this idea?”
-        </p>
+
+        <div style="margin-top:14px; color:var(--muted2); font-size:13px;">
+          Core knobs:
+          <span class="term t-violet">Tag Placement</span>
+          <span class="term t-amber">Heat</span>
+          <span class="term t-rose">Anchors</span>
+          <span class="term t-mint">Columns</span>
+        </div>
       </div>
 
-      <div class="card hero-side">
+      <div class="card pad">
         <div class="stack">
           <div class="mini">
             <h3>What you do</h3>
             <p>
-              Drag tags around the field, adjust heat, optionally add one or more anchor images.
-              Watch formations appear beneath intersections.
+              Drag tags around the field, adjust heat per tag, optionally add
+              <span class="term t-rose">one</span> or <span class="term t-rose">multiple</span> anchor images.
             </p>
           </div>
           <div class="mini">
-            <h3>What Atlas does</h3>
+            <h3>What forms</h3>
             <p>
-              Converts each image into a similarity fingerprint, then resolves placement in a spatial field so your archive becomes a navigable landscape.
+              Under intersections, images settle into <span class="term t-mint">stalagmite columns</span>:
+              top = closest matches, down = more variation.
             </p>
           </div>
           <div class="mini">
-            <h3>Why it feels different</h3>
+            <h3>Why it’s different</h3>
             <p>
-              Lists are linear. Atlas is relational. It shows gradients, clusters, and crossroads you would never discover in folders.
+              Folders are rigid. Search is memory-dependent.
+              Atlas is a live map: it reveals relationships you didn’t know to ask for.
             </p>
           </div>
         </div>
       </div>
     </div>
 
-    <section id="how">
-      <div class="grid">
-        <div class="card panel span7">
-          <h2>How it works</h2>
-          <p class="lead">
-            Atlas has one central trick: <b>an XY tag field</b> that creates <b>vertical formations</b> of images underneath.
-            You sculpt the field. The archive responds.
-          </p>
-          <ol class="bullets">
-            <li><b>Place tags on the XY field</b> (Texture, Minimal, Grain, Soft Light, Vintage, etc.).</li>
-            <li><b>Move tags closer</b> to strengthen their blend. <b>Move them apart</b> to loosen the blend.</li>
-            <li><b>Heat</b> controls how much a tag “absorbs” images into its influence.</li>
-            <li><b>Images settle underneath</b> the field at positions that best match the active tag geometry.</li>
-            <li><b>Where influences overlap strongly</b>, a stalagmite column forms: top = best matches, bottom = weaker matches.</li>
-            <li>Optionally add <b>one or multiple anchor images</b> to bias formations toward a specific seed aesthetic.</li>
-          </ol>
-        </div>
-
-        <div class="card panel span5">
-          <h2>What you get</h2>
-          <p class="lead">A library that behaves like a map.</p>
-          <div>
-            <span class="tag">Clusters of Meaning</span>
-            <span class="tag">Stalagmite Columns</span>
-            <span class="tag">Heat Control</span>
-            <span class="tag">Anchor Images</span>
-            <span class="tag">Column Pairing</span>
-            <span class="tag">Layer Navigation</span>
-          </div>
-          <ul class="bullets">
-            <li>Instant discovery of “neighbors” to an idea.</li>
-            <li>Live sculpting: shift one tag, the whole landscape reshapes.</li>
-            <li>Deep browsing by drilling into any column image-by-image.</li>
-            <li>Explainability: every formation has a signature describing why it exists.</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section id="terms">
-      <div class="card panel">
-        <h2>Vocabulary that makes the system click</h2>
+    <!-- AT A GLANCE -->
+    <section id="glance">
+      <div class="card pad">
+        <div class="subhead">At a glance</div>
+        <h2>The entire concept in four tiles</h2>
         <p class="lead">
-          These terms are not fluff. They are handles for the mental model so anyone can understand what’s happening.
+          If someone reads only this block, they should still “get” Atlas.
         </p>
 
-        <div class="term-grid">
-          <div class="term">
-            <b><em>XY Tag Field</em></b>
-            A 2D plane where tags are placed like bodies in a map. Distance matters.
-            Close tags blend strongly. Far tags blend softly.
+        <div class="glance">
+          <div class="tile">
+            <div class="badge b1">1) Place</div>
+            <h3><span class="term t-violet">XY Tag Field</span></h3>
+            <p>
+              Tags sit on a plane. Distance matters:
+              closer tags blend harder, distant tags blend softer.
+            </p>
           </div>
-          <div class="term">
-            <b><em>Heat</em></b>
-            The strength of a tag’s pull. Default heat is neutral, meaning the field shows the most balanced placement.
-            Increase heat to prioritize that tag and absorb more images into its influence.
+
+          <div class="tile">
+            <div class="badge b4">2) Tune</div>
+            <h3><span class="term t-amber">Heat</span> per tag</h3>
+            <p>
+              Heat is strength. Default heat shows neutral truth.
+              Raise heat to pull more images into that tag’s gravity.
+            </p>
           </div>
-          <div class="term">
-            <b><em>Stalagmite Column</em></b>
-            A vertical ranked stack of images that forms beneath a strong intersection of influences.
-            Top = closest matches. Down the column = increasing divergence.
+
+          <div class="tile">
+            <div class="badge b3">3) Form</div>
+            <h3><span class="term t-mint">Stalagmites</span></h3>
+            <p>
+              Under strong overlaps, ranked columns appear:
+              top = best matches, lower = weaker matches.
+            </p>
           </div>
-          <div class="term">
-            <b><em>Anchor Image</em></b>
-            One or more images you select as seeds. They become additional attractors that bias the field and reshape formations.
-          </div>
-          <div class="term">
-            <b><em>Column Pairing</em></b>
-            A comparison mode: select two columns (often neighbors) and lock them side-by-side to see how tiny field shifts change the ranked results.
-          </div>
-          <div class="term">
-            <b><em>Layer Overview</em></b>
-            A way to view “slices” of the system at different depths or perspectives.
-            Think: you can inspect the top of the landscape or descend layer-by-layer.
-          </div>
-          <div class="term">
-            <b><em>Column Signature</em></b>
-            A compact identity marker for a column that records its coordinate and how it relates to all active tags and anchors.
-            This makes formations reproducible and explainable.
-          </div>
-          <div class="term">
-            <b><em>Relational Descriptor</em></b>
-            A readable breakdown showing how strongly an image aligns with each tag.
-            It answers “why is this here?” without guesswork.
+
+          <div class="tile">
+            <div class="badge b2">4) Bias</div>
+            <h3><span class="term t-rose">Anchor Images</span></h3>
+            <p>
+              Add one or multiple anchor images to steer the field into
+              a branched dimension shaped by your seed aesthetic.
+            </p>
           </div>
         </div>
 
-        <div class="hr"></div>
+        <div style="margin-top:14px" class="diagram" aria-label="Atlas mental model diagram">
+          <span class="k">Tags</span> placed in <span class="v">XY</span>  +  <span class="a">Heat</span> tuned  +  optional <span class="m">Anchors</span>
+          <br/>
+          → intersections resolve
+          <br/>
+          → <span class="m">stalagmite columns</span> form (ranked)
+          <br/>
+          → browse by <span class="k">top layer</span> or drill <span class="k">image-by-image</span>
+        </div>
+      </div>
+    </section>
 
-        <div class="cols2">
-          <div>
-            <h3 style="margin:0 0 8px; font-size:16px; color:var(--muted)">A simple example</h3>
-            <p class="lead" style="margin:0 0 10px">
-              Place <b>Texture</b> close to <b>Dark</b>, keep <b>Minimal</b> farther away, then raise heat on Texture.
-              Atlas will form a tighter column that favors gritty, darker images, even pulling in moderate matches that previously sat elsewhere.
-            </p>
-          </div>
-          <div>
-            <h3 style="margin:0 0 8px; font-size:16px; color:var(--muted)">What “default heat” means</h3>
-            <p class="lead" style="margin:0">
-              With equal heat across tags, Atlas shows the most neutral field equilibrium.
-              When you change heat, you are intentionally biasing which concepts should dominate formation.
-            </p>
+    <!-- THE MODEL -->
+    <section id="model">
+      <div class="grid">
+        <div class="card pad span7">
+          <div class="subhead">The model</div>
+          <h2>What moving tags actually does</h2>
+          <p class="lead">
+            Tags aren’t labels. They are <b>forces</b>.
+            Their positions create a geometry of meaning.
+          </p>
+
+          <p class="lead" style="margin-top:10px">
+            <span class="term t-violet">Close tags</span> create
+            tighter intersections: fewer images qualify, but they match more precisely.
+            <br/>
+            <span class="term t-violet">Far tags</span> create
+            softer intersections: more images qualify, with broader variety.
+          </p>
+
+          <p class="lead" style="margin-top:10px">
+            With equal <span class="term t-amber">Heat</span>, the field is neutral.
+            When you increase a tag’s heat, you’re telling Atlas:
+            <b>“Care more about this concept.”</b>
+            That expands its basin and absorbs more images into its orbit.
+          </p>
+        </div>
+
+        <div class="card pad span5">
+          <div class="subhead">Why it’s readable</div>
+          <h2>Explainability built in</h2>
+          <p class="lead">
+            Atlas doesn’t just show results. It can show “why.”
+          </p>
+          <div style="margin-top:10px; color:var(--muted); font-size:13px;">
+            Any image or column can expose:
+            <div style="margin-top:10px">
+              <span class="term t-cyan">Coordinate</span>
+              <span class="term t-mint">Relational Descriptor</span>
+              <span class="term t-violet">Column Signature</span>
+              <span class="term t-amber">Heat Context</span>
+            </div>
+            <div style="margin-top:10px; color:var(--muted2)">
+              So the user learns the system while using it, without headaches.
+            </div>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- TERMS -->
+    <section id="terms">
+      <div class="card pad">
+        <div class="subhead">Glossary</div>
+        <h2>Unique terms that make Atlas instantly graspable</h2>
+        <p class="lead">
+          These names are “handles” for the mental model. They’re designed for quick comprehension.
+        </p>
+
+        <div class="gloss" style="margin-top:14px">
+          <div class="def">
+            <div class="name">
+              <div class="big"><span class="term t-violet">XY Tag Field</span></div>
+              <div class="hint">the map</div>
+            </div>
+            <p>Tags live on a plane. Their geometry defines what combinations become “strong” intersections.</p>
+          </div>
+
+          <div class="def">
+            <div class="name">
+              <div class="big"><span class="term t-amber">Heat</span></div>
+              <div class="hint">the power knob</div>
+            </div>
+            <p>Heat is tag strength. Default heat is neutral equilibrium. Higher heat expands that tag’s basin and pulls in more images.</p>
+          </div>
+
+          <div class="def">
+            <div class="name">
+              <div class="big"><span class="term t-mint">Stalagmite</span></div>
+              <div class="hint">the formation</div>
+            </div>
+            <p>A vertical ranked column of images under an intersection. Top = strongest matches. Deeper = more divergence.</p>
+          </div>
+
+          <div class="def">
+            <div class="name">
+              <div class="big"><span class="term t-rose">Anchor Image(s)</span></div>
+              <div class="hint">the seed(s)</div>
+            </div>
+            <p>One or multiple images used as additional attractors that bias the field. This creates branched dimensions of meaning.</p>
+          </div>
+
+          <div class="def">
+            <div class="name">
+              <div class="big"><span class="term t-cyan">Relational Descriptor</span></div>
+              <div class="hint">the why</div>
+            </div>
+            <p>A readable breakdown of how strongly an image aligns with every active tag in the field.</p>
+          </div>
+
+          <div class="def">
+            <div class="name">
+              <div class="big"><span class="term t-violet">Column Signature</span></div>
+              <div class="hint">the fingerprint</div>
+            </div>
+            <p>A compact marker encoding: tag positions, tag heats, anchor context, and the column’s identity so it can be compared and revisited.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEWS -->
     <section id="views">
       <div class="grid">
-        <div class="card panel span6">
-          <h2>Z-Dimension Layer Overview</h2>
+        <div class="card pad span6">
+          <div class="subhead">Views</div>
+          <h2>Z overview: top layer to deep variation</h2>
           <p class="lead">
-            View the landscape from the top, then descend. At the top, you see the purest matches.
-            As you move downward, you reveal more variation and divergence.
+            See only the strongest matches (top layer), or descend layer-by-layer to reveal increasingly diverse members.
           </p>
-          <ul class="bullets">
-            <li><b>Global dial:</b> reveals the cluster depth layer-by-layer or all at once.</li>
-            <li><b>Local dial:</b> click a column and traverse image-by-image by rank, including numeric jump.</li>
-            <li>Each image can display its coordinate and relational descriptor to show why it belongs.</li>
-          </ul>
+          <p class="lead" style="margin-top:10px">
+            <span class="term t-cyan">Global dial</span> controls the full scene depth.
+            <span class="term t-mint">Local dial</span> drills one stalagmite image-by-image (including numeric jump).
+          </p>
         </div>
 
-        <div class="card panel span6">
-          <h2>X-Dimension Layer Overview</h2>
+        <div class="card pad span6">
+          <div class="subhead">Views</div>
+          <h2>X overview: side profile of meaning</h2>
           <p class="lead">
-            A side-on perspective that shows how formations distribute laterally across the field.
-            This helps you see neighboring columns, compare them, and understand how the field geometry shapes outcomes.
+            Inspect lateral structure: neighboring stalagmites, transitions between intersections, and how the geometry reshapes outcomes.
           </p>
-          <ul class="bullets">
-            <li>Ideal for <b>column pairing</b> and inspecting transitions between nearby intersections.</li>
-            <li>Shows the “shape” of meaning, not just the top-ranked results.</li>
-            <li>Reveals where overlaps create stronger or weaker formations.</li>
-          </ul>
+          <p class="lead" style="margin-top:10px">
+            Best for <span class="term t-violet">column pairing</span>:
+            lock two columns side-by-side and compare how small changes alter the rankings.
+          </p>
         </div>
       </div>
     </section>
 
-    <section id="scope">
-      <div class="card panel">
-        <h2>The scope and beauty of the project</h2>
-        <p class="lead">
-          Atlas is designed as a foundation that scales from a practical organizer to a full spatial intelligence system.
-          Here is the clean progression.
-        </p>
+    <!-- BIG IMAGE PLACEHOLDER -->
+    <section id="image">
+      <div class="subhead">Visual anchor</div>
+      <h2 style="margin-bottom:10px">One big image at the bottom</h2>
+      <p class="lead" style="margin-bottom:14px">
+        Drop your best concept render here later (a screenshot of the tag field + stalagmites).
+        For now, this placeholder keeps the layout clean and futuristic.
+      </p>
 
-        <div class="grid" style="margin-top:8px">
-          <div class="term span12">
-            <b><em>Atlas 1.0: Plain Atlas</em></b>
-            XY Tag Field + Heat + Stalagmite Columns + optional single or multi-anchor images.
-            The core gravity engine.
+      <div class="big-image" role="img" aria-label="Large image placeholder">
+        <div class="img-frame">
+          <div>
+            <div class="title">[ PLACEHOLDER: Atlas Field + Stalagmites Render ]</div>
+            <p class="desc">
+              Recommended final image: a cinematic view of the <span class="term t-violet">XY Tag Field</span> hovering above
+              a terrain of <span class="term t-mint">stalagmite columns</span>, with color-coded tags and a highlighted intersection.
+            </p>
+            <div class="img-chip">1920×1080 • PNG/JPG • replace this block with an &lt;img&gt;</div>
           </div>
-          <div class="term span12">
-            <b><em>Atlas 2.0: Atlas Sphere</em></b>
-            The same engine constrained to a globe.
-            Meaning becomes geography: coordinates, regions, local neighborhoods, and navigable worlds.
-          </div>
-          <div class="term span12">
-            <b><em>Atlas 3.0: Atlas Dimensions</em></b>
-            Dimensional overviews, deeper explainability, and comparative analysis.
-            Z-layer traversal, X-side inspection, and column-by-column pairing with signatures.
-          </div>
-        </div>
-
-        <div class="hr"></div>
-
-        <h3 style="margin:0 0 10px; font-size:16px; color:var(--muted)">The promise</h3>
-        <p class="lead" style="margin:0 0 12px">
-          Atlas makes your archive behave like a living universe: you do not organize once and hope it stays useful.
-          You sculpt meaning on demand, and the library rearranges itself to match the moment.
-        </p>
-
-        <div class="codebox" aria-label="Quick mental model">
-Tag placement (XY)  +  Tag strength (Heat)  +  Optional anchors (Images)
-          ↓
-Resolved intersections
-          ↓
-Stalagmite columns (ranked)
-          ↓
-Layer navigation + column comparison + explainable signatures
         </div>
       </div>
     </section>
 
     <footer>
-      <div class="hr"></div>
-      <div>
-        Atlas is a concept-to-system blueprint: a spatial interface for meaning that can be implemented with image embeddings,
-        a vector index, and a responsive interactive UI. Replace this footer with your product links, demo, and contact.
+      <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;">
+        <div>
+          <b>Atlas</b> — a spatial interface for meaning.
+          <span style="color:rgba(255,255,255,.32)">|</span>
+          <span style="color:rgba(255,255,255,.60)">Built for visual minds.</span>
+        </div>
+        <div style="font-family:var(--mono); color:rgba(255,255,255,.45)">
+          Atlas 1.0 • Field → Formations • Heat + Anchors
+        </div>
       </div>
     </footer>
   </div>
+
+  <!-- Tip: Replace the placeholder with a real image later:
+  <img src="your-image.png" alt="Atlas Field render" style="width:100%;height:auto;display:block;border-radius:26px" />
+  -->
 </body>
 </html>
