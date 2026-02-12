@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Atlas Sphere — Cartographers of Meaning</title>
+  <meta name="description" content="Atlas Sphere: a spherical, navigable meaning-space where tags and anchor images sit on the surface and the archive settles inside by best approximation. Heat controls, cluster bookmarking, and annotation-based navigation for visual thinkers." />
+
+  <style>
+    :root{
+      --bg0:#070913;
+      --bg1:#0b1022;
+      --panel:rgba(255,255,255,.06);
+      --panel2:rgba(255,255,255,.035);
+      --border:rgba(255,255,255,.10);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.68);
+      --muted2:rgba(255,255,255,.52);
+
+      --cyan:#4fd1ff;
+      --violet:#a78bfa;
+      --mint:#34d399;
+      --amber:#fbbf24;
+      --rose:#fb7185;
+
+      --g-call:#ff3df2;   /* calling color */
+      --g-call2:#79c0ff;
+
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --radius: 18px;
+      --radius2: 26px;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 14% 0%, rgba(167,139,250,.18), transparent 60%),
+        radial-gradient(1000px 800px at 85% 10%, rgba(79,209,255,.14), transparent 62%),
+        radial-gradient(900px 700px at 40% 110%, rgba(52,211,153,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      letter-spacing: .1px;
+      line-height: 1.45;
+    }
+
+    a{color:var(--cyan); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{max-width:1180px; margin:0 auto; padding:28px 18px 84px}
+
+    /* Top bar */
+    .top{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:14px; padding:10px 6px 18px;
+      position:sticky; top:0; z-index:20;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(7,9,19,.72), rgba(7,9,19,.28));
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight:900; letter-spacing:.2px;
+    }
+    .spark{
+      width:14px; height:14px; border-radius:999px;
+      background: conic-gradient(from 0deg, var(--cyan), var(--violet), var(--mint), var(--cyan));
+      box-shadow: 0 0 0 5px rgba(79,209,255,.10);
+    }
+    .nav{display:flex; gap:14px; flex-wrap:wrap}
+    .nav a{
+      color:var(--muted);
+      font-weight:700;
+      font-size:13px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid transparent;
+    }
+    .nav a:hover{
+      color:var(--text);
+      border-color: rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      text-decoration:none;
+    }
+
+    /* Cards */
+    .card{
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border:1px solid var(--border);
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+    }
+    .pad{padding:18px}
+    .pad-xl{padding:26px 22px}
+
+    /* Hero */
+    .hero{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:16px;
+      align-items:stretch;
+      margin-top:8px;
+    }
+    @media (max-width: 940px){ .hero{grid-template-columns:1fr} }
+
+    .kicker{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:7px 12px; border-radius:999px;
+      background: rgba(79,209,255,.10);
+      border:1px solid rgba(79,209,255,.22);
+      color: var(--muted);
+      font-size:13px;
+      font-weight:700;
+      width:max-content;
+    }
+    .kdot{
+      width:8px; height:8px; border-radius:999px;
+      background: var(--cyan);
+      box-shadow: 0 0 18px rgba(79,209,255,.65);
+    }
+
+    h1{
+      margin:14px 0 10px;
+      font-size:44px;
+      line-height:1.03;
+      letter-spacing:-.8px;
+    }
+    @media (max-width: 520px){ h1{font-size:34px} }
+
+    .lead{
+      color:var(--muted);
+      font-size:16px;
+      max-width: 78ch;
+      margin: 0;
+    }
+
+    /* Emphasis terms */
+    .term{
+      font-weight:900;
+      letter-spacing:.1px;
+      padding:2px 8px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      display:inline-block;
+      margin: 2px 4px 2px 0;
+      white-space:nowrap;
+    }
+    .t-cyan{ color: rgba(79,209,255,.95); border-color: rgba(79,209,255,.25); background: rgba(79,209,255,.08);}
+    .t-violet{ color: rgba(167,139,250,.96); border-color: rgba(167,139,250,.25); background: rgba(167,139,250,.08);}
+    .t-mint{ color: rgba(52,211,153,.96); border-color: rgba(52,211,153,.25); background: rgba(52,211,153,.08);}
+    .t-amber{ color: rgba(251,191,36,.95); border-color: rgba(251,191,36,.25); background: rgba(251,191,36,.08);}
+    .t-rose{ color: rgba(251,113,133,.95); border-color: rgba(251,113,133,.25); background: rgba(251,113,133,.08);}
+
+    .t-gom{
+      color: rgba(255,61,242,.96);
+      border-color: rgba(255,61,242,.30);
+      background: rgba(255,61,242,.10);
+      box-shadow: 0 0 0 6px rgba(255,61,242,.06);
+    }
+
+    /* Calling block */
+    .call{
+      margin-top:14px;
+      padding:14px 14px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.14);
+      background:
+        radial-gradient(900px 240px at 20% 10%, rgba(255,61,242,.16), transparent 55%),
+        radial-gradient(900px 240px at 90% 20%, rgba(121,192,255,.12), transparent 60%),
+        rgba(0,0,0,.20);
+      position:relative;
+      overflow:hidden;
+    }
+    .call:before{
+      content:"";
+      position:absolute; inset:-60px -60px auto auto;
+      width:240px; height:240px;
+      background: radial-gradient(circle at 35% 35%, rgba(255,61,242,.22), transparent 60%);
+      transform: rotate(18deg);
+    }
+    .call-title{
+      margin:0 0 6px;
+      font-size:20px;
+      font-weight:1000;
+      letter-spacing:-.35px;
+      color: transparent;
+      background-image: linear-gradient(90deg, var(--g-call), var(--g-call2));
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+    .call p{margin:0; color: rgba(255,255,255,.78); font-size:13.5px}
+
+    .cta-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      padding:10px 14px; border-radius: 14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      font-weight:900;
+      font-size:13px;
+      letter-spacing:.2px;
+    }
+    .btn.primary{
+      border-color: rgba(79,209,255,.42);
+      background: rgba(79,209,255,.12);
+      box-shadow: 0 0 0 7px rgba(79,209,255,.07);
+    }
+    .btn:hover{filter:brightness(1.08); text-decoration:none}
+
+    /* Side stack */
+    .stack{display:grid; gap:12px}
+    .mini{
+      padding:14px;
+      border-radius: var(--radius);
+      background: rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .mini h3{
+      margin:0 0 6px;
+      font-size:13px;
+      color:var(--muted);
+      font-weight:1000;
+      letter-spacing:.35px;
+      text-transform:uppercase;
+    }
+    .mini p{margin:0; color:var(--muted2); font-size:13px}
+
+    /* Sections */
+    section{margin-top:22px}
+    h2{
+      margin:0 0 8px;
+      font-size:24px;
+      letter-spacing:-.25px;
+    }
+    .subhead{
+      font-family: var(--mono);
+      font-size:12px;
+      color: rgba(255,255,255,.58);
+      letter-spacing:.6px;
+      text-transform:uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* Grid helper */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:14px;
+      margin-top:18px;
+    }
+    .span12{grid-column: span 12}
+    .span8{grid-column: span 8}
+    .span4{grid-column: span 4}
+    .span6{grid-column: span 6}
+    @media (max-width: 940px){
+      .span8,.span4,.span6{grid-column: span 12}
+    }
+
+    /* Tiles */
+    .tiles{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:12px;
+      margin-top:14px;
+    }
+    @media (max-width: 980px){ .tiles{grid-template-columns: repeat(2, minmax(0,1fr));} }
+    @media (max-width: 560px){ .tiles{grid-template-columns: 1fr;} }
+
+    .tile{
+      padding:14px;
+      border-radius: var(--radius);
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.20);
+      position:relative;
+      overflow:hidden;
+    }
+    .tile:before{
+      content:"";
+      position:absolute; inset:-40px -40px auto auto;
+      width:160px; height:160px;
+      background: radial-gradient(circle at 30% 30%, rgba(79,209,255,.16), transparent 60%);
+      transform: rotate(18deg);
+    }
+    .tile h3{
+      margin:0 0 6px;
+      font-size:16px;
+      letter-spacing:-.15px;
+    }
+    .tile p{margin:0; color:var(--muted); font-size:13px}
+
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:12px; font-weight:1000;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.76);
+      margin-bottom:10px;
+      width:max-content;
+    }
+    .b1{border-color: rgba(79,209,255,.25); background: rgba(79,209,255,.07)}
+    .b2{border-color: rgba(167,139,250,.25); background: rgba(167,139,250,.07)}
+    .b3{border-color: rgba(52,211,153,.25); background: rgba(52,211,153,.07)}
+    .b4{border-color: rgba(251,191,36,.25); background: rgba(251,191,36,.07)}
+    .b5{border-color: rgba(255,61,242,.25); background: rgba(255,61,242,.07)}
+
+    /* Diagram block */
+    .diagram{
+      font-family: var(--mono);
+      font-size:12px;
+      line-height:1.55;
+      color: rgba(255,255,255,.80);
+      background: rgba(0,0,0,.34);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: var(--radius);
+      padding:12px;
+      overflow:auto;
+    }
+    .diagram .k{color: rgba(79,209,255,.95)}
+    .diagram .v{color: rgba(167,139,250,.95)}
+    .diagram .m{color: rgba(52,211,153,.95)}
+    .diagram .a{color: rgba(251,191,36,.95)}
+    .diagram .g{color: rgba(255,61,242,.95)}
+
+    /* Sphere placeholder */
+    .sphere{
+      border-radius: var(--radius2);
+      border:1px solid rgba(255,255,255,.12);
+      overflow:hidden;
+      position:relative;
+      min-height: 420px;
+      background:
+        radial-gradient(520px 520px at 50% 45%, rgba(79,209,255,.20), transparent 60%),
+        radial-gradient(900px 520px at 25% 20%, rgba(167,139,250,.14), transparent 62%),
+        radial-gradient(900px 520px at 75% 80%, rgba(52,211,153,.10), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      box-shadow: var(--shadow);
+    }
+    .sphere:after{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        linear-gradient(120deg, rgba(0,0,0,.48), rgba(0,0,0,.06), rgba(0,0,0,.48));
+      pointer-events:none;
+    }
+    .sphere-inner{
+      position:absolute; inset:18px;
+      border-radius: 20px;
+      border: 1px dashed rgba(255,255,255,.18);
+      background: rgba(0,0,0,.22);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:18px;
+    }
+    .sphere-title{
+      font-size:18px;
+      font-weight:1000;
+      letter-spacing:-.2px;
+      margin-bottom:8px;
+    }
+    .sphere-desc{
+      color: var(--muted);
+      font-size:13px;
+      max-width: 76ch;
+      margin: 0 auto;
+    }
+    .chip{
+      display:inline-flex; gap:8px; align-items:center;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      padding:6px 10px;
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size:11px;
+      color: rgba(255,255,255,.78);
+      margin-top: 14px;
+    }
+
+    footer{
+      margin-top:28px;
+      color: rgba(255,255,255,.50);
+      font-size:12px;
+      border-top:1px solid rgba(255,255,255,.10);
+      padding-top:14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <span class="spark" aria-hidden="true"></span>
+        <span>Atlas Sphere</span>
+      </div>
+      <div class="nav">
+        <a href="#what">What it is</a>
+        <a href="#how">How it works</a>
+        <a href="#controls">Controls</a>
+        <a href="#navigation">Navigation</a>
+        <a href="#visual">Visual</a>
+      </div>
+    </div>
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="card pad-xl">
+        <div class="kicker"><span class="kdot"></span>Atlas v2.0 — Spherical Meaning Space</div>
+
+        <h1>
+          The archive becomes a <span class="term t-violet">Sphere</span>,
+          and you become a <span class="term t-gom">Cartographer of Meaning</span>.
+        </h1>
+
+        <p class="lead">
+          Atlas Sphere simplifies the entire Atlas idea by switching from a flat tag-plane to a
+          <b>bounded, navigable world</b>. You place tags and anchor images on the <b>surface</b>.
+          The system then mathematically places every image <b>inside</b> the sphere where it best approximates
+          those surface forces.
+        </p>
+
+        <div class="call">
+          <div class="call-title">Why a sphere?</div>
+          <p>
+            Because it prevents “infinite sprawl.” The Sphere is a world with edges, routes, and regions.
+            It keeps meaning discoverable, revisitable, and easy to navigate without getting lost.
+          </p>
+        </div>
+
+        <div class="cta-row">
+          <a class="btn primary" href="#how">See how the placement works</a>
+          <a class="btn" href="#navigation">Bookmarking & annotations</a>
+          <a class="btn" href="#controls">Heat & interaction</a>
+        </div>
+      </div>
+
+      <div class="card pad">
+        <div class="stack">
+          <div class="mini">
+            <h3>What you place</h3>
+            <p>
+              <span class="term t-cyan">Tags</span> and
+              <span class="term t-rose">Anchor Images</span>
+              on the sphere’s surface.
+            </p>
+          </div>
+          <div class="mini">
+            <h3>What settles</h3>
+            <p>
+              All other images fall into the sphere at their best-fit coordinate, forming
+              <span class="term t-mint">clusters</span> and <span class="term t-mint">routes</span>.
+            </p>
+          </div>
+          <div class="mini">
+            <h3>How you explore</h3>
+            <p>
+              Click inside the sphere, open a local neighborhood view, increase heat, or jump via
+              bookmarks so you never lose your place.
+            </p>
+          </div>
+          <div class="mini">
+            <h3>What you become</h3>
+            <p>
+              A <span class="term t-gom">Cartographer of Meaning</span>:
+              you name regions, annotate clusters, and build a navigable atlas of your visual mind.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WHAT IT IS -->
+    <section id="what">
+      <div class="card pad">
+        <div class="subhead">What it is</div>
+        <h2>Atlas Sphere, explained in plain language</h2>
+        <p class="lead">
+          Imagine your entire image collection living inside a glass globe.
+          Around the surface are “meaning markers” (tags) and “aesthetic anchors” (images you choose).
+          The globe pulls every image into the spot where it makes the most sense.
+        </p>
+
+        <div class="tiles">
+          <div class="tile">
+            <div class="badge b1">Boundary</div>
+            <h3>A finite world (no sprawl)</h3>
+            <p>
+              Instead of endlessly expanding space, the Sphere forces all meaning into a navigable volume.
+              Regions stay findable.
+            </p>
+          </div>
+
+          <div class="tile">
+            <div class="badge b2">Surface logic</div>
+            <h3>Tags + anchors live on the surface</h3>
+            <p>
+              You place concepts and seed aesthetics on the outside, so the inside can “settle” in response.
+            </p>
+          </div>
+
+          <div class="tile">
+            <div class="badge b3">Natural clusters</div>
+            <h3>Clusters appear as geography</h3>
+            <p>
+              The sphere fills with visual continents, dense cities, corridors, and quiet deserts of rarity.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how">
+      <div class="grid">
+        <div class="card pad span8">
+          <div class="subhead">How it works</div>
+          <h2>Best approximation placement, inside a sphere</h2>
+          <p class="lead">
+            Atlas Sphere places each image where it best fits the combined pull of the surface.
+            In practice, that means each image is scored against:
+          </p>
+
+          <div style="margin-top:10px; color:var(--muted); font-size:13px;">
+            <span class="term t-cyan">Active Tags</span>
+            <span class="term t-rose">Anchor Images</span>
+            <span class="term t-amber">Heat Weights</span>
+            <span class="term t-mint">Local Neighborhood Fit</span>
+          </div>
+
+          <p class="lead" style="margin-top:10px">
+            The output is a coordinate inside the sphere where the image “belongs.”
+            Similar images land near each other automatically, producing clusters you can navigate like geography.
+          </p>
+
+          <div class="diagram" aria-label="Atlas Sphere placement mental model">
+            <span class="g">Sphere Surface</span>: <span class="k">Tags</span> + <span class="m">Anchor Images</span> + <span class="a">Heat</span>
+            <br/>
+            <span class="g">Sphere Interior</span>: all images placed at best-fit coordinates
+            <br/>
+            → dense clusters form where meanings overlap
+            <br/>
+            → “routes” appear between nearby clusters (visual transitions)
+            <br/>
+            → click any point to open a local neighborhood gallery (e.g., ~40 nearest images)
+          </div>
+        </div>
+
+        <div class="card pad span4">
+          <div class="subhead">Why it simplifies</div>
+          <h2>One shape, one rule</h2>
+          <p class="lead">
+            The Sphere reduces complexity by making everything a placement problem:
+            put meaning on the surface, let the archive settle inside.
+          </p>
+          <p class="lead" style="margin-top:10px">
+            No fragile folder trees, no “where did I put that.”
+            If it matches your surface forces, it appears where you’d intuitively look.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTROLS -->
+    <section id="controls">
+      <div class="card pad">
+        <div class="subhead">Controls</div>
+        <h2>Heat, interaction, and direct exploration</h2>
+        <p class="lead">
+          Atlas Sphere stays neutral by default: equal heat produces the most faithful map of your archive’s natural structure.
+          Then you can bend the world intentionally.
+        </p>
+
+        <div class="tiles">
+          <div class="tile">
+            <div class="badge b4">Heat</div>
+            <h3><span class="term t-amber">Heat</span> pulls mass</h3>
+            <p>
+              Increase a tag’s heat to pull more images toward that concept, even if it means stealing them from neighboring concepts.
+              You are literally reshaping the geography.
+            </p>
+          </div>
+
+          <div class="tile">
+            <div class="badge b1">Click</div>
+            <h3>Click inside the sphere</h3>
+            <p>
+              Click any visible cluster point to open a neighborhood view: the closest set of images around that coordinate.
+              It’s “local browsing” without search terms.
+            </p>
+          </div>
+
+          <div class="tile">
+            <div class="badge b2">Anchors</div>
+            <h3><span class="term t-rose">Anchor images</span> steer style</h3>
+            <p>
+              Add anchor images to bias the entire interior. The sphere becomes an aesthetic world orbiting your chosen seeds.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NAVIGATION -->
+    <section id="navigation">
+      <div class="grid">
+        <div class="card pad span6">
+          <div class="subhead">Navigation</div>
+          <h2>Never get lost: bookmarks + annotations</h2>
+          <p class="lead">
+            Atlas Sphere treats clusters as places you can name, save, and return to.
+            Users can bookmark regions, annotate clusters, and build a personal map of the globe.
+          </p>
+
+          <div style="margin-top:12px; color:var(--muted); font-size:13px;">
+            A cluster bookmark can store:
+            <div style="margin-top:10px">
+              <span class="term t-cyan">Sphere Coordinate</span>
+              <span class="term t-violet">Surface Layout</span>
+              <span class="term t-amber">Heat Settings</span>
+              <span class="term t-mint">Cluster Members</span>
+              <span class="term t-rose">Notes</span>
+            </div>
+          </div>
+
+          <p class="lead" style="margin-top:10px">
+            This is why the tagline matters:
+            <span class="term t-gom">we are cartographers of meaning</span>.
+            The user isn’t just viewing images, they’re charting a world.
+          </p>
+        </div>
+
+        <div class="card pad span6">
+          <div class="subhead">Navigation modes</div>
+          <h2>Region view + neighborhood view</h2>
+          <p class="lead">
+            Atlas Sphere supports two “human-friendly” ways to explore:
+          </p>
+
+          <div class="tiles" style="margin-top:12px">
+            <div class="tile">
+              <div class="badge b3">Region view</div>
+              <h3>Wide angle</h3>
+              <p>
+                See the whole sphere as geography: where the big clusters live, where the transitions are, what regions are dense.
+              </p>
+            </div>
+            <div class="tile">
+              <div class="badge b1">Neighborhood view</div>
+              <h3>Local slice</h3>
+              <p>
+                Click a point and see a slice of the world around it, like “40 nearby images” in that direction of meaning.
+              </p>
+            </div>
+            <div class="tile">
+              <div class="badge b5">Cartography</div>
+              <h3>Saved routes</h3>
+              <p>
+                Save a path between two clusters and attach notes, tags, and reasons.
+                You can build a guided tour of your archive.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISUAL -->
+    <section id="visual">
+      <div class="subhead">Visual anchor</div>
+      <h2 style="margin-bottom:10px">Sphere render placeholder</h2>
+      <p class="lead" style="margin-bottom:14px">
+        Drop a future render here: tags and anchors on the surface, clusters inside, and a clicked neighborhood slice.
+      </p>
+
+      <div class="sphere" role="img" aria-label="Large Atlas Sphere placeholder">
+        <div class="sphere-inner">
+          <div>
+            <div class="sphere-title">[ PLACEHOLDER: Atlas Sphere Render ]</div>
+            <p class="sphere-desc">
+              Recommended final image: a translucent globe with <span class="term t-cyan">tags</span> and
+              <span class="term t-rose">anchor images</span> on the surface, interior clusters visible like constellations,
+              and a highlighted clicked cluster showing a “local slice” gallery.
+            </p>
+            <div class="chip">1920×1080 • PNG/JPG • replace this block with an &lt;img&gt;</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;">
+        <div>
+          <b>Atlas Sphere</b> — a bounded world for meaning.
+          <span style="color:rgba(255,255,255,.32)">|</span>
+          <span style="color:rgba(255,255,255,.60)">Cartographers of Meaning.</span>
+        </div>
+        <div style="font-family:var(--mono); color:rgba(255,255,255,.45)">
+          Atlas v2.0 • Surface Forces → Interior Placement • Heat + Bookmarks
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Tip: Replace the placeholder with a real image later:
+  <img src="atlas-sphere-render.png" alt="Atlas Sphere render" style="width:100%;height:auto;display:block;border-radius:26px" />
+  -->
+</body>
+</html>
